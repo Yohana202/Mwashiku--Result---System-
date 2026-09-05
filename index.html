@@ -3,148 +3,451 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mwashiku Results System</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background: #f4f6f8;
-      color: #222;
-    }
-
-    header {
-      background: #0b5ed7;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-
-    header h1 {
-      font-size: 22px;
-      margin-bottom: 5px;
-    }
-
-    header p {
-      font-size: 14px;
-    }
-
-    .container {
-      padding: 20px;
-      max-width: 1100px;
-      margin: auto;
-    }
-
-    .welcome {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .welcome h2 {
-      color: #0b5ed7;
-      margin-bottom: 8px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      text-align: center;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .card h3 {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 10px;
-    }
-
-    .card .number {
-      font-size: 28px;
-      font-weight: bold;
-      color: #0b5ed7;
-    }
-
-    .menu-title {
-      margin-bottom: 15px;
-      color: #333;
-    }
-
-    .menu {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 15px;
-    }
-
-    .menu button {
-      border: none;
-      background: white;
-      padding: 18px 10px;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      font-size: 15px;
-    }
-
-    .menu button:hover {
-      background: #eaf2ff;
-    }
-
-    .performance {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .progress {
-      background: #ddd;
-      height: 18px;
-      border-radius: 20px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    .progress-bar {
-      width: 78%;
-      height: 100%;
-      background: #0b5ed7;
-    }
-
-    footer {
-      text-align: center;
-      padding: 25px;
-      color: #777;
-      font-size: 13px;
-    }
-  </style>
+  <title>Shule ya Msingi Mwashiku - Results Management System</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SweetAlert2 kwa Alert Notifications za Kisasa -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+<body class="bg-slate-100 text-slate-800 font-sans pb-20 selection:bg-blue-600 selection:text-white">
 
-<body>
+  <!-- OFFLINE / ONLINE STATUS BAR -->
+  <div id="connectionStatus" class="hidden text-center py-1 text-xs font-bold text-white transition-all duration-300"></div>
 
-<header>
-  <h1>SHULE YA MSINGI MWASHIKU</h1>
-  <p>RESULTS MANAGEMENT SYSTEM</p>
-</header>
+  <!-- AUTH SECTION (LOGIN / REGISTER / FORGOT PASSWORD) -->
+  <div id="authSection" class="min-h-screen flex items-center justify-center p-4 bg-slate-900 bg-opacity-95">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+      
+      <!-- BRAND HEADER -->
+      <div class="bg-blue-900 text-white p-6 text-center">
+        <div class="w-16 h-16 bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+          <i class="fa-solid fa-school text-2xl text-yellow-400"></i>
+        </div>
+        <h1 class="text-xl font-bold tracking-wide">SHULE YA MSINGI MWASHIKU</h1>
+        <p class="text-xs text-blue-200 mt-1">WILAYA YA BUSEGA – SIMIYU</p>
+      </div>
 
-<div class="container">
+      <!-- FORM 1: LOGIN FORM -->
+      <form id="loginForm" class="p-6 space-y-4">
+        <h2 class="text-lg font-bold text-slate-800 text-center border-b pb-2">Kuingia Mfumoni (Login)</h2>
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina la Mtumiaji (Username)</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400 text-sm"></i>
+            <input type="text" id="loginUsername" required class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ingiza Username">
+          </div>
+        </div>
 
-  <div class="welcome">
-    <h2>Dashboard</h2>
-    <p>Karibu kwenye mfumo wa kuchakata na kuchanganua matokeo 
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri (Password)</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-sm"></i>
+            <input type="password" id="loginPassword" required class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>INGIA MFUMONI</span>
+        </button>
+
+        <div class="flex justify-between items-center text-xs pt-2">
+          <button type="button" onclick="switchAuthMode('forgot')" class="text-blue-700 hover:underline">Umesahau Nenosiri?</button>
+          <button type="button" onclick="switchAuthMode('register')" class="text-emerald-700 font-bold hover:underline">Jisajili Hapa</button>
+        </div>
+      </form>
+
+      <!-- FORM 2: REGISTER FORM -->
+      <form id="registerForm" class="p-6 space-y-4 hidden">
+        <h2 class="text-lg font-bold text-slate-800 text-center border-b pb-2">Usajili wa Mwalimu Mpya</h2>
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Buono (Full Name)</label>
+          <input type="text" id="regFullName" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. Yohana Masalu">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina la Mtumiaji (Username)</label>
+          <input type="text" id="regUsername" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. mwalimuyohana">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Namba ya PIN ya Usalama (PIN ya tarakimu 4)</label>
+          <input type="number" id="regPin" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. 1234">
+          <p class="text-[10px] text-slate-500 mt-0.5">PIN hii itatumika pale utakaposahau nenosiri lako.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri (Password)</label>
+          <input type="password" id="regPassword" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>KAMILISHA USAJILI</span>
+        </button>
+
+        <p class="text-center text-xs">
+          Tayari una akunti? <button type="button" onclick="switchAuthMode('login')" class="text-blue-700 font-bold hover:underline">Ingia hapa</button>
+        </p>
+      </form>
+
+      <!-- FORM 3: FORGOT PASSWORD FORM -->
+      <form id="forgotForm" class="p-6 space-y-4 hidden">
+        <h2 class="text-lg font-bold text-slate-800 text-center border-b pb-2">Badili Nenosiri (Reset Password)</h2>
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Username Yako</label>
+          <input type="text" id="resetUsername" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ingiza username">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">PIN Yako ya Usalama (Security PIN)</label>
+          <input type="number" id="resetPin" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ingiza PIN uliyojisajilia">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri Jipya</label>
+          <input type="password" id="resetNewPassword" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Weka password mpya">
+        </div>
+
+        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-key"></i>
+          <span>BADILI NENOSIRI</span>
+        </button>
+
+        <p class="text-center text-xs">
+          Rudi kwenye <button type="button" onclick="switchAuthMode('login')" class="text-blue-700 font-bold hover:underline">Fomu ya Kuingia</button>
+        </p>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- MAIN APP DASHBOARD (HIDDEN UNTIL LOGGED IN) -->
+  <div id="appSection" class="hidden">
+    
+    <!-- HEADER -->
+    <header class="bg-blue-900 text-white p-4 shadow-lg sticky top-0 z-40 flex justify-between items-center">
+      <div>
+        <h1 class="text-base font-bold tracking-wide">MWASHIKU PRIMARY SCHOOL</h1>
+        <p class="text-[10px] text-blue-200">RESULTS SYSTEM | BUSEGA</p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span id="activeUserBadge" class="bg-blue-800 text-xs px-2.5 py-1 rounded-full border border-blue-700 font-medium"></span>
+        <button onclick="logoutUser()" class="text-red-300 hover:text-white text-sm p-1" title="Ondoka Mfumoni">
+          <i class="fa-solid fa-power-off"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- FILTER BAR -->
+    <section class="bg-blue-800 text-white px-4 py-2.5 shadow-inner">
+      <div class="container mx-auto grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <label class="block text-[10px] text-blue-200 uppercase font-bold">MWAKA WA MASOMO</label>
+          <select id="appYearSelect" onchange="refreshDashboardData()" class="w-full bg-blue-900 text-white border border-blue-600 rounded px-2 py-1 focus:outline-none">
+            <option value="2026" selected>2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] text-blue-200 uppercase font-bold">DARASA</label>
+          <select id="appClassSelect" onchange="refreshDashboardData()" class="w-full bg-blue-900 text-white border border-blue-600 rounded px-2 py-1 focus:outline-none">
+            <option value="ALL">MADARASA YOTE</option>
+            <option value="AWALI">AWALI (0-100 Marks)</option>
+            <option value="I">DARASA I (0-100 Marks)</option>
+            <option value="II">DARASA II (0-100 Marks)</option>
+            <option value="III">DARASA III (0-50 Marks)</option>
+            <option value="IV">DARASA IV (0-50 Marks)</option>
+            <option value="V">DARASA V (0-50 Marks)</option>
+            <option value="VI">DARASA VI (0-50 Marks)</option>
+            <option value="VII">DARASA VII (0-50 Marks)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="container mx-auto p-4 space-y-5">
+      
+      <!-- STAT CARDS -->
+      <section class="grid grid-cols-2 gap-3">
+        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-3">
+          <div class="bg-blue-100 text-blue-800 p-2.5 rounded-lg text-lg"><i class="fa-solid fa-users"></i></div>
+          <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase">Wanafunzi</p>
+            <h2 id="cardTotalStudents" class="text-base font-bold text-slate-800">0</h2>
+          </div>
+        </div>
+
+        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-3">
+          <div class="bg-emerald-100 text-emerald-800 p-2.5 rounded-lg text-lg"><i class="fa-solid fa-file-pen"></i></div>
+          <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase">Matokeo</p>
+            <h2 id="cardTotalResults" class="text-base font-bold text-slate-800">0</h2>
+          </div>
+        </div>
+      </section>
+
+      <!-- GRADING SYSTEM INFO CARD -->
+      <section class="bg-amber-50 p-3.5 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
+        <div class="flex items-center space-x-2 font-bold text-amber-800 border-b border-amber-200 pb-1">
+          <i class="fa-solid fa-award text-amber-600 text-sm"></i>
+          <span>Mfumo Rasmi wa Madaraja (A - E)</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
+          <div>
+            <strong class="block text-slate-700">Awali, I, II (Max 100):</strong>
+            • A: 81 - 100<br>
+            • B: 61 - 80<br>
+            • C: 41 - 60<br>
+            • D: 21 - 40<br>
+            • E: 0 - 20
+          </div>
+          <div>
+            <strong class="block text-slate-700">III - VII (Max 50):</strong>
+            • A: 41 - 50<br>
+            • B: 31 - 40<br>
+            • C: 21 - 30<br>
+            • D: 11 - 20<br>
+            • E: 0 - 10
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK MENU GRID -->
+      <section class="space-y-2">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Menyu Kuu</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="showAlert('Wanafunzi', 'Sehemu ya usajili wa wanafunzi na wazazi inafunguka hatua inayofuata.')" class="bg-white hover:bg-blue-50 text-slate-700 p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center space-y-1">
+            <i class="fa-solid fa-user-plus text-blue-700 text-2xl"></i>
+            <span class="text-xs font-bold">Wanafunzi</span>
+          </button>
+
+          <button onclick="showAlert('Ingiza Alama', 'Sehemu ya uingizaji alama inafunguka hatua inayofuata.')" class="bg-white hover:bg-blue-50 text-slate-700 p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center space-y-1">
+            <i class="fa-solid fa-calculator text-emerald-600 text-2xl"></i>
+            <span class="text-xs font-bold">Ingiza Alama</span>
+          </button>
+
+          <button onclick="showAlert('SMS kwa Mzazi', 'Sehemu ya kutuma SMS kwa wazazi inafunguka hatua inayofuata.')" class="bg-white hover:bg-blue-50 text-slate-700 p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center space-y-1">
+            <i class="fa-solid fa-comment-sms text-indigo-600 text-2xl"></i>
+            <span class="text-xs font-bold">SMS Mzazi</span>
+          </button>
+
+          <button onclick="showAlert('Ripoti', 'Sehemu ya kutengeneza Ripoti inafunguka hatua inayofuata.')" class="bg-white hover:bg-blue-50 text-slate-700 p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center space-y-1">
+            <i class="fa-solid fa-file-invoice text-purple-600 text-2xl"></i>
+            <span class="text-xs font-bold">Ripoti / Cards</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- JAVASCRIPT ENGINE (LOGIC ALL-IN-ONE) -->
+  <script>
+    /* ====================================================================
+     * SHULE YA MSINGI MWASHIKU - SYSTEM LOGIC ENGINE
+     * ==================================================================== */
+
+    // 1. ANGLIA HALI YA MTANDAO (ONLINE / OFFLINE DETECTOR)
+    function updateOnlineStatus() {
+      const statusDiv = document.getElementById('connectionStatus');
+      if (navigator.onLine) {
+        statusDiv.textContent = "ONLINE MODE: Mfumo umeunganishwa na mtandao.";
+        statusDiv.className = "bg-emerald-600 text-white text-center py-1 text-xs font-bold transition-all duration-300";
+        setTimeout(() => { statusDiv.classList.add('hidden'); }, 3000);
+      } else {
+        statusDiv.textContent = "OFFLINE MODE: Unafanya kazi bila mtandao. Data zitahifadhiwa kwenye simu!";
+        statusDiv.className = "bg-amber-600 text-white text-center py-1 text-xs font-bold block transition-all duration-300";
+        statusDiv.classList.remove('hidden');
+      }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // 2. ALERT ENGINE (SWEETALERT2 INTEGRATION)
+    function showAlert(title, text, icon = 'info') {
+      Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        confirmButtonColor: '#1e3a8a',
+        confirmButtonText: 'Sawa'
+      });
+    }
+
+    function showToast(message, icon = 'success') {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: icon,
+        title: message,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true
+      });
+    }
+
+    // 3. KANUNI YA KUCHAKATA DARAJA (GRADES A - E)
+    function calculateGrade(marks, className) {
+      const isUpperClass = ['III', 'IV', 'V', 'VI', 'VII'].includes(className);
+      
+      if (isUpperClass) {
+        // Alama 0 - 50 (Darasa la III mpaka VII)
+        if (marks >= 41) return { grade: 'A', remark: 'Imara Sana' };
+        if (marks >= 31) return { grade: 'B', remark: 'Vizuri' };
+        if (marks >= 21) return { grade: 'C', remark: 'Wastani' };
+        if (marks >= 11) return { grade: 'D', remark: 'Dhaifu' };
+        return { grade: 'E', remark: 'Dhaifu Sana' };
+      } else {
+        // Alama 0 - 100 (Awali, Darasa la I na II)
+        if (marks >= 81) return { grade: 'A', remark: 'Imara Sana' };
+        if (marks >= 61) return { grade: 'B', remark: 'Vizuri' };
+        if (marks >= 41) return { grade: 'C', remark: 'Wastani' };
+        if (marks >= 21) return { grade: 'D', remark: 'Dhaifu' };
+        return { grade: 'E', remark: 'Dhaifu Sana' };
+      }
+    }
+
+    // 4. AUTH FORM SWITCHER
+    function switchAuthMode(mode) {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+      document.getElementById('forgotForm').classList.add('hidden');
+
+      if (mode === 'login') {
+        document.getElementById('loginForm').classList.remove('hidden');
+      } else if (mode === 'register') {
+        document.getElementById('registerForm').classList.remove('hidden');
+      } else if (mode === 'forgot') {
+        document.getElementById('forgotForm').classList.remove('hidden');
+      }
+    }
+
+    // 5. STORAGE HELPERS
+    function getUsersFromStorage() {
+      return JSON.parse(localStorage.getItem('mwashiku_teachers')) || [];
+    }
+
+    function saveUsersToStorage(users) {
+      localStorage.setItem('mwashiku_teachers', JSON.stringify(users));
+    }
+
+    // HANDLER: REGISTER
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const fullName = document.getElementById('regFullName').value.trim();
+      const username = document.getElementById('regUsername').value.trim().toLowerCase();
+      const pin = document.getElementById('regPin').value.trim();
+      const password = document.getElementById('regPassword').value;
+
+      const users = getUsersFromStorage();
+
+      const exists = users.find(u => u.username === username);
+      if (exists) {
+        showAlert('Kosa la Usajili!', 'Username hii tayari imetumiwa na mwalimu mwingine.', 'error');
+        return;
+      }
+
+      users.push({ fullName, username, pin, password });
+      saveUsersToStorage(users);
+
+      showToast('Usajili umekamilika! Unaweza kuingia sasa.');
+      this.reset();
+      switchAuthMode('login');
+    });
+
+    // HANDLER: LOGIN
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+
+      const users = getUsersFromStorage();
+      const user = users.find(u => u.username === username && u.password === password);
+
+      if (user) {
+        localStorage.setItem('mwashiku_active_user', JSON.stringify(user));
+        showToast(`Karibu Mwalimu ${user.fullName}`);
+        initAppSession(user);
+      } else {
+        showAlert('Imeshindikana Kuingia!', 'Username au Password siyo sahihi. Hakikisha umejisajili kwanza.', 'error');
+      }
+    });
+
+    // HANDLER: RESET PASSWORD
+    document.getElementById('forgotForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('resetUsername').value.trim().toLowerCase();
+      const pin = document.getElementById('resetPin').value.trim();
+      const newPassword = document.getElementById('resetNewPassword').value;
+
+      let users = getUsersFromStorage();
+      const userIndex = users.findIndex(u => u.username === username && u.pin === pin);
+
+      if (userIndex !== -1) {
+        users[userIndex].password = newPassword;
+        saveUsersToStorage(users);
+        showAlert('Umefanikiwa!', 'Nenosiri lako limebadilishwa kikamilifu. Ingia sasa.', 'success');
+        this.reset();
+        switchAuthMode('login');
+      } else {
+        showAlert('Taarifa Sio Sahihi!', 'Username au Security PIN uliyoingiza haviendani na kumbukumbu zetu.', 'error');
+      }
+    });
+
+    // 6. SESSION MANAGEMENT
+    function initAppSession(user) {
+      document.getElementById('authSection').classList.add('hidden');
+      document.getElementById('appSection').classList.remove('hidden');
+      document.getElementById('activeUserBadge').innerHTML = `<i class="fa-solid fa-user-check text-emerald-400 mr-1"></i> ${user.fullName}`;
+      refreshDashboardData();
+    }
+
+    function logoutUser() {
+      Swal.fire({
+        title: 'Je, unataka kutoka?',
+        text: "Utahitaji kuingiza password tena ili utumie mfumo.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ndiyo, Nitoke',
+        cancelButtonText: 'Hapana'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          localStorage.removeItem('mwashiku_active_user');
+          document.getElementById('appSection').classList.add('hidden');
+          document.getElementById('authSection').classList.remove('hidden');
+          switchAuthMode('login');
+          showToast('Umetoka mfumoni kikamilifu.', 'info');
+        }
+      });
+    }
+
+    function refreshDashboardData() {
+      document.getElementById('cardTotalStudents').innerText = "0";
+      document.getElementById('cardTotalResults').innerText = "0";
+    }
+
+    // 7. INITIALIZATION WHEN PAGE LOADS
+    window.addEventListener('DOMContentLoaded', () => {
+      updateOnlineStatus();
+      
+      const activeUser = JSON.parse(localStorage.getItem('mwashiku_active_user'));
+      if (activeUser) {
+        initAppSession(activeUser);
+      }
+    });
+  </script>
+</body>
+</html>
