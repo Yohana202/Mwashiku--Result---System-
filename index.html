@@ -9,8 +9,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- SweetAlert2 kwa Alert Notifications za Kisasa -->
+  <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- jsPDF & AutoTable kwa ajili ya PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     @media print {
@@ -55,7 +58,10 @@
           <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri (Password)</label>
           <div class="relative">
             <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-sm"></i>
-            <input type="password" id="loginPassword" required class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
+            <input type="password" id="loginPassword" required class="w-full pl-9 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
+            <button type="button" onclick="togglePassword('loginPassword', 'loginEyeIcon')" class="absolute right-3 top-2.5 text-slate-500 hover:text-blue-900">
+              <i id="loginEyeIcon" class="fa-solid fa-eye text-sm"></i>
+            </button>
           </div>
         </div>
 
@@ -75,7 +81,7 @@
         <h2 class="text-lg font-bold text-slate-800 text-center border-b pb-2">Usajili wa Mwalimu Mpya</h2>
         
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Buono (Full Name)</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Kamili (Full Name)</label>
           <input type="text" id="regFullName" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. Yohana Masalu">
         </div>
 
@@ -91,7 +97,12 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri (Password)</label>
-          <input type="password" id="regPassword" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
+          <div class="relative">
+            <input type="password" id="regPassword" required class="w-full pl-3 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
+            <button type="button" onclick="togglePassword('regPassword', 'regEyeIcon')" class="absolute right-3 top-2.5 text-slate-500 hover:text-blue-900">
+              <i id="regEyeIcon" class="fa-solid fa-eye text-sm"></i>
+            </button>
+          </div>
         </div>
 
         <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2">
@@ -120,7 +131,12 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri Jipya</label>
-          <input type="password" id="resetNewPassword" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Weka password mpya">
+          <div class="relative">
+            <input type="password" id="resetNewPassword" required class="w-full pl-3 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Weka password mpya">
+            <button type="button" onclick="togglePassword('resetNewPassword', 'resetEyeIcon')" class="absolute right-3 top-2.5 text-slate-500 hover:text-blue-900">
+              <i id="resetEyeIcon" class="fa-solid fa-eye text-sm"></i>
+            </button>
+          </div>
         </div>
 
         <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2">
@@ -167,14 +183,14 @@
           <label class="block text-[10px] text-blue-200 uppercase font-bold">DARASA</label>
           <select id="appClassSelect" onchange="refreshDashboardData()" class="w-full bg-blue-900 text-white border border-blue-600 rounded px-2 py-1 focus:outline-none">
             <option value="ALL">MADARASA YOTE</option>
-            <option value="AWALI">AWALI (0-100 Marks)</option>
-            <option value="I">DARASA I (0-100 Marks)</option>
-            <option value="II">DARASA II (0-100 Marks)</option>
-            <option value="III">DARASA III (0-50 Marks)</option>
-            <option value="IV">DARASA IV (0-50 Marks)</option>
-            <option value="V">DARASA V (0-50 Marks)</option>
-            <option value="VI">DARASA VI (0-50 Marks)</option>
-            <option value="VII">DARASA VII (0-50 Marks)</option>
+            <option value="AWALI">AWALI</option>
+            <option value="I">DARASA I</option>
+            <option value="II">DARASA II</option>
+            <option value="III">DARASA III</option>
+            <option value="IV">DARASA IV</option>
+            <option value="V">DARASA V</option>
+            <option value="VI">DARASA VI</option>
+            <option value="VII">DARASA VII</option>
           </select>
         </div>
       </div>
@@ -239,9 +255,26 @@
         <h2 class="text-sm font-bold text-slate-800">USAJILI WA WANAFUNZI</h2>
       </div>
 
-      <!-- FORM: ADD STUDENT -->
+      <!-- EXCEL BULK UPLOAD & TEMPLATE SECTION -->
+      <section class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-2">
+        <h3 class="text-xs font-bold text-blue-900 uppercase"><i class="fa-solid fa-file-excel mr-1"></i> Usajili wa Pamoja (Bulk Registration)</h3>
+        <p class="text-[11px] text-slate-600">Download fomu ya Excel/CSV ujaze majina ukiwa offline, kisha ipakie hapa kusajili mara moja.</p>
+        
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button onclick="downloadStudentTemplate()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-3 py-1.5 rounded font-bold flex items-center space-x-1">
+            <i class="fa-solid fa-download"></i> <span>Download Template</span>
+          </button>
+
+          <label class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer flex items-center space-x-1">
+            <i class="fa-solid fa-file-import"></i> <span>Pakia (Upload) CSV</span>
+            <input type="file" id="csvFileInput" accept=".csv" onchange="uploadStudentCSV(event)" class="hidden">
+          </label>
+        </div>
+      </section>
+
+      <!-- FORM: ADD SINGLE STUDENT -->
       <form id="addStudentForm" class="bg-white p-4 rounded-xl border border-slate-200 space-y-3 shadow-sm">
-        <h3 class="text-xs font-bold text-blue-900 uppercase border-b pb-1">Sajili Mwanafunzi Mpya</h3>
+        <h3 class="text-xs font-bold text-blue-900 uppercase border-b pb-1">Sajili Mwanafunzi Mmoja Mmoja</h3>
         
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
@@ -301,9 +334,15 @@
         </button>
       </form>
 
-      <!-- STUDENT LIST TABLE -->
+      <!-- STUDENT LIST TABLE & PDF EXPORT -->
       <section class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-2">
-        <h3 class="text-xs font-bold text-slate-700 uppercase">Orodha ya Wanafunzi Waliosajiliwa</h3>
+        <div class="flex justify-between items-center border-b pb-2">
+          <h3 class="text-xs font-bold text-slate-700 uppercase">Orodha ya Wanafunzi Waliosajiliwa</h3>
+          <button onclick="downloadStudentListPDF()" class="bg-red-700 hover:bg-red-800 text-white text-[11px] px-2.5 py-1 rounded font-bold flex items-center space-x-1">
+            <i class="fa-solid fa-file-pdf"></i> <span>Download PDF</span>
+          </button>
+        </div>
+
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs border-collapse">
             <thead>
@@ -359,7 +398,7 @@
         </div>
 
         <div id="marksFormContainer" class="hidden space-y-4 pt-2">
-          <p class="text-xs text-blue-900 font-bold border-b pb-1">Ingiza Maksi za Kila Somo (Max: 100 kwa I-II, 50 kwa III-VII):</p>
+          <p class="text-xs text-blue-900 font-bold border-b pb-1">Ingiza Maksi za Kila Somo:</p>
           <div class="overflow-x-auto">
             <table class="w-full text-xs text-left border">
               <thead class="bg-slate-100">
@@ -374,7 +413,7 @@
                 </tr>
               </thead>
               <tbody id="marksTableBody">
-                <!-- Data za maksi zitaingia hapa -->
+                <!-- Data -->
               </tbody>
             </table>
           </div>
@@ -434,7 +473,7 @@
               </tr>
             </thead>
             <tbody id="reportTableBody">
-              <!-- Matokeo yapo hapa -->
+              <!-- Data -->
             </tbody>
           </table>
         </div>
@@ -519,6 +558,21 @@
 
   <!-- JAVASCRIPT ENGINE -->
   <script>
+    // SHOW / HIDE PASSWORD FUNCTION
+    function togglePassword(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+
     function updateOnlineStatus() {
       const statusDiv = document.getElementById('connectionStatus');
       if (navigator.onLine) {
@@ -654,6 +708,92 @@
             </td>
           </tr>`;
       });
+    }
+
+    // DOWNLOAD TEMPLATE FOR BULK UPLOAD
+    function downloadStudentTemplate() {
+      const csvContent = "data:text/csv;charset=utf-8,AdmNo,FullName,Gender,Class,Year,ParentName,ParentPhone\nMW/2026/001,JOHN YOHANA,M,IV,2026,Yohana Malole,0764437443\nMW/2026/002,MARY PAUL,F,IV,2026,Paul Joseph,0764124875";
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "mwashiku_student_template.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // UPLOAD CSV FUNCTION
+    function uploadStudentCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const lines = e.target.result.split('\n');
+        let students = getStudentsFromStorage();
+        let addedCount = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line) {
+            const cols = line.split(',');
+            if (cols.length >= 7) {
+              students.push({
+                id: Date.now() + i,
+                admNo: cols[0].trim(),
+                fullName: cols[1].trim().toUpperCase(),
+                gender: cols[2].trim().toUpperCase(),
+                className: cols[3].trim().toUpperCase(),
+                year: cols[4].trim(),
+                parentName: cols[5].trim(),
+                parentPhone: cols[6].trim()
+              });
+              addedCount++;
+            }
+          }
+        }
+        saveStudentsToStorage(students);
+        renderStudentTable(); refreshDashboardData();
+        showAlert('Umefanikiwa!', `Wanafunzi ${addedCount} wamesajiliwa kutoka kwenye faili la CSV.`, 'success');
+      };
+      reader.readAsText(file);
+    }
+
+    // DOWNLOAD STUDENT LIST AS PDF
+    function downloadStudentListPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const students = getStudentsFromStorage();
+
+      if (students.length === 0) {
+        showAlert('Taarifa', 'Hakuna wanafunzi wa kudownload PDF.', 'info');
+        return;
+      }
+
+      doc.setFontSize(14);
+      doc.text("SHULE YA MSINGI MWASHIKU - IGUNGA TABORA", 14, 15);
+      doc.setFontSize(10);
+      doc.text("ORODHA YA WANAFUNZI WALIOSAILIWA", 14, 22);
+
+      const tableData = students.map((s, index) => [
+        index + 1,
+        s.admNo,
+        s.fullName,
+        s.gender,
+        s.className,
+        s.parentName,
+        s.parentPhone
+      ]);
+
+      doc.autoTable({
+        startY: 28,
+        head: [['#', 'Adm No', 'Jina Kamili', 'Jinsia', 'Darasa', 'Mzazi', 'Simu']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [30, 58, 138] }
+      });
+
+      doc.save('Orodha_ya_Wanafunzi_Mwashiku.pdf');
     }
 
     // MARKS LOGIC
