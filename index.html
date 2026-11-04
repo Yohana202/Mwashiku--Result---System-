@@ -505,12 +505,9 @@
           <option value="VI">DARASA VI</option>
           <option value="VII">DARASA VII</option>
         </select>
-        <div id="smsPreviewBox" class="hidden space-y-2">
-          <h3 class="text-xs font-bold text-slate-700">Preview ya SMS zenye Maoni na Matokeo:</h3>
-          <div id="smsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
-          <button onclick="showAlert('Imetumwa', 'SMS zote zenye matokeo na maoni zimewekwa kwenye foleni ya kutumwa.', 'success')" class="w-full bg-indigo-700 text-white font-bold py-2 rounded text-xs">
-            TUMA SMS ZOTE KWA WAZAZI
-          </button>
+        <div id="smsPreviewBox" class="hidden space-y-3">
+          <h3 class="text-xs font-bold text-slate-700">Orodha ya Ujumbe wa SMS kwa Wazazi:</h3>
+          <div id="smsList" class="space-y-3 max-h-80 overflow-y-auto"></div>
         </div>
       </div>
     </main>
@@ -1123,18 +1120,40 @@
       const students = localStudents.filter(s => s.className === cls);
       const subjects = getSubjectsForClass(cls);
 
-      students.forEach(s => {
+      let rankedStudents = students.map(s => {
         const m = localMarks[s.id] || {};
         let total = 0;
         subjects.forEach(sub => { total += Number(m[sub.key]) || 0; });
-        const avg = (total / subjects.length).toFixed(1);
-        const grade = calculateGrade(avg, cls);
-        const comments = getTeacherComments(grade);
+        const avg = Number((total / subjects.length).toFixed(1));
+        return { ...s, marks: m, total, avg, grade: calculateGrade(avg, cls) };
+      });
+      rankedStudents.sort((a, b) => b.total - a.total);
+
+      rankedStudents.forEach((s, idx) => {
+        const rank = idx + 1;
+        const totalStudents = rankedStudents.length;
+        const comments = getTeacherComments(s.grade);
+
+        let subjectsText = subjects.map(sub => {
+          let val = s.marks[sub.key] !== undefined ? s.marks[sub.key] : 0;
+          let subGrade = calculateGrade(val, cls);
+          return `${sub.name}: ${val} (${subGrade})`;
+        }).join(', ');
+
+        let smsBody = `Taarifa ya Matokeo ya ${s.fullName}: ${subjectsText}. Jumla: ${s.total}, Wastani: ${s.avg}, Daraja: ${s.grade}, Nafasi: ${rank} kati ya ${totalStudents}. Maoni ya Mwalimu: ${comments.teacher} - Mwashiku Primary`;
+
+        let smsHref = `sms:${s.parentPhone}?body=${encodeURIComponent(smsBody)}`;
 
         list.innerHTML += `
-          <div class="bg-slate-100 p-2.5 rounded text-xs border space-y-1">
-            <p class="font-bold text-blue-900">Kwa Mzazi wa: ${s.fullName} (${s.parentPhone})</p>
-            <p class="text-slate-700 italic">"Mwanafunzi wako amepata Jumla: ${total}, Wastani: ${avg}, Daraja: ${grade}. Maoni ya Mwalimu: ${comments.teacher} Maoni ya Mkuu: ${comments.headmaster} - Mwashiku Primary"</p>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-2">
+            <div class="flex justify-between items-center font-bold text-blue-900 border-b pb-1">
+              <span>Mzazi: ${s.parentName} (${s.parentPhone})</span>
+              <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Nafasi: ${rank}/${totalStudents}</span>
+            </div>
+            <p class="text-slate-700 leading-relaxed">${smsBody}</p>
+            <a href="${smsHref}" class="inline-block bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded text-[11px]">
+              <i class="fa-solid fa-paper-plane mr-1"></i> Tuma SMS Kupitia Simu
+            </a>
           </div>`;
       });
       box.classList.remove('hidden');
@@ -1150,7 +1169,6 @@
     function logoutUser() {
       localStorage.removeItem('mwashiku_active_user');
       document.getElementById('appSection').classList.add('hidden');
-      document.getElementById('authSection').classList.add('hidden'); // Fix toggle
       document.getElementById('authSection').classList.remove('hidden');
       switchAuthMode('login'); showToast('Umetoka mfumoni.', 'info');
     }
