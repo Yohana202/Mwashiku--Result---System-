@@ -11,9 +11,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- jsPDF & AutoTable kwa ajili ya PDF -->
+  <!-- jsPDF & AutoTable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- FIREBASE SDKs (Compat v9) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
   <style>
     @media print {
@@ -29,11 +33,9 @@
   <!-- OFFLINE / ONLINE STATUS BAR -->
   <div id="connectionStatus" class="hidden text-center py-1 text-xs font-bold text-white transition-all duration-300"></div>
 
-  <!-- AUTH SECTION (LOGIN / REGISTER / FORGOT PASSWORD) -->
+  <!-- AUTH SECTION -->
   <div id="authSection" class="min-h-screen flex items-center justify-center p-4 bg-slate-900 bg-opacity-95">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
-      
-      <!-- BRAND HEADER -->
       <div class="bg-blue-900 text-white p-6 text-center">
         <div class="w-16 h-16 bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
           <i class="fa-solid fa-school text-2xl text-yellow-400"></i>
@@ -42,61 +44,49 @@
         <p class="text-xs text-blue-200 mt-1 uppercase font-semibold">WILAYA YA IGUNGA – TABORA</p>
       </div>
 
-      <!-- FORM 1: LOGIN FORM -->
+      <!-- LOGIN FORM -->
       <form id="loginForm" class="p-6 space-y-4">
         <h2 class="text-lg font-bold text-slate-800 text-center border-b pb-2">Kuingia Mfumoni (Login)</h2>
-        
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina la Mtumiaji (Username)</label>
-          <div class="relative">
-            <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400 text-sm"></i>
-            <input type="text" id="loginUsername" required class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ingiza Username">
-          </div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+          <input type="text" id="loginUsername" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ingiza Username">
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri (Password)</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri</label>
           <div class="relative">
-            <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-sm"></i>
-            <input type="password" id="loginPassword" required class="w-full pl-9 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
+            <input type="password" id="loginPassword" required class="w-full pl-3 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
             <button type="button" onclick="togglePassword('loginPassword', 'loginEyeIcon')" class="absolute right-3 top-2.5 text-slate-500 hover:text-blue-900">
               <i id="loginEyeIcon" class="fa-solid fa-eye text-sm"></i>
             </button>
           </div>
         </div>
-
         <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2">
           <i class="fa-solid fa-right-to-bracket"></i>
           <span>INGIA MFUMONI</span>
         </button>
-
         <div class="flex justify-between items-center text-xs pt-2">
           <button type="button" onclick="switchAuthMode('forgot')" class="text-blue-700 hover:underline">Umesahau Nenosiri?</button>
           <button type="button" onclick="switchAuthMode('register')" class="text-emerald-700 font-bold hover:underline">Jisajili Hapa</button>
         </div>
       </form>
 
-      <!-- FORM 2: REGISTER FORM -->
+      <!-- REGISTER FORM -->
       <form id="registerForm" class="p-6 space-y-4 hidden">
         <h2 class="text-lg font-bold text-slate-800 text-center border-b pb-2">Usajili wa Mwalimu Mpya</h2>
-        
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Kamili (Full Name)</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Kamili</label>
           <input type="text" id="regFullName" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. Yohana Masalu">
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Jina la Mtumiaji (Username)</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
           <input type="text" id="regUsername" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. mwalimuyohana">
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Namba ya PIN ya Usalama (Tarakimu 4)</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Security PIN (Tarakimu 4)</label>
           <input type="number" id="regPin" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. 1234">
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri (Password)</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri</label>
           <div class="relative">
             <input type="password" id="regPassword" required class="w-full pl-3 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="••••••••">
             <button type="button" onclick="togglePassword('regPassword', 'regEyeIcon')" class="absolute right-3 top-2.5 text-slate-500 hover:text-blue-900">
@@ -104,58 +94,40 @@
             </button>
           </div>
         </div>
-
         <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2">
           <i class="fa-solid fa-user-plus"></i>
           <span>KAMILISHA USAJILI</span>
         </button>
-
         <p class="text-center text-xs">
           Tayari una akunti? <button type="button" onclick="switchAuthMode('login')" class="text-blue-700 font-bold hover:underline">Ingia hapa</button>
         </p>
       </form>
 
-      <!-- FORM 3: FORGOT PASSWORD FORM -->
+      <!-- FORGOT PASSWORD -->
       <form id="forgotForm" class="p-6 space-y-4 hidden">
-        <h2 class="text-lg font-bold text-slate-800 text-center border-b pb-2">Badili Nenosiri (Reset Password)</h2>
-        
+        <h2 class="text-lg font-bold text-slate-800 text-center border-b pb-2">Badili Nenosiri</h2>
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Username Yako</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
           <input type="text" id="resetUsername" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ingiza username">
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">PIN Yako ya Usalama</label>
-          <input type="number" id="resetPin" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ingiza PIN uliyojisajilia">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Security PIN</label>
+          <input type="number" id="resetPin" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ingiza PIN">
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Nenosiri Jipya</label>
-          <div class="relative">
-            <input type="password" id="resetNewPassword" required class="w-full pl-3 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Weka password mpya">
-            <button type="button" onclick="togglePassword('resetNewPassword', 'resetEyeIcon')" class="absolute right-3 top-2.5 text-slate-500 hover:text-blue-900">
-              <i id="resetEyeIcon" class="fa-solid fa-eye text-sm"></i>
-            </button>
-          </div>
+          <input type="password" id="resetNewPassword" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Weka password mpya">
         </div>
-
-        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2">
-          <i class="fa-solid fa-key"></i>
-          <span>BADILI NENOSIRI</span>
-        </button>
-
+        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-lg shadow-md transition">BADILI NENOSIRI</button>
         <p class="text-center text-xs">
-          Rudi kwenye <button type="button" onclick="switchAuthMode('login')" class="text-blue-700 font-bold hover:underline">Fomu ya Kuingia</button>
+          Rudi kwenye <button type="button" onclick="switchAuthMode('login')" class="text-blue-700 font-bold hover:underline">Login</button>
         </p>
       </form>
-
     </div>
   </div>
 
   <!-- MAIN APP DASHBOARD -->
   <div id="appSection" class="hidden">
-    
-    <!-- HEADER -->
     <header class="bg-blue-900 text-white p-4 shadow-lg sticky top-0 z-40 flex justify-between items-center">
       <div>
         <h1 class="text-base font-bold tracking-wide">MWASHIKU PRIMARY SCHOOL</h1>
@@ -163,7 +135,7 @@
       </div>
       <div class="flex items-center space-x-3">
         <span id="activeUserBadge" class="bg-blue-800 text-xs px-2.5 py-1 rounded-full border border-blue-700 font-medium"></span>
-        <button onclick="logoutUser()" class="text-red-300 hover:text-white text-sm p-1" title="Ondoka Mfumoni">
+        <button onclick="logoutUser()" class="text-red-300 hover:text-white text-sm p-1" title="Ondoka">
           <i class="fa-solid fa-power-off"></i>
         </button>
       </div>
@@ -173,15 +145,15 @@
     <section class="bg-blue-800 text-white px-4 py-2.5 shadow-inner">
       <div class="container mx-auto grid grid-cols-2 gap-2 text-xs">
         <div>
-          <label class="block text-[10px] text-blue-200 uppercase font-bold">MWAKA WA MASOMO</label>
-          <select id="appYearSelect" onchange="refreshDashboardData()" class="w-full bg-blue-900 text-white border border-blue-600 rounded px-2 py-1 focus:outline-none">
+          <label class="block text-[10px] text-blue-200 uppercase font-bold">MWAKA</label>
+          <select id="appYearSelect" class="w-full bg-blue-900 text-white border border-blue-600 rounded px-2 py-1 focus:outline-none">
             <option value="2026" selected>2026</option>
             <option value="2025">2025</option>
           </select>
         </div>
         <div>
           <label class="block text-[10px] text-blue-200 uppercase font-bold">DARASA</label>
-          <select id="appClassSelect" onchange="refreshDashboardData()" class="w-full bg-blue-900 text-white border border-blue-600 rounded px-2 py-1 focus:outline-none">
+          <select id="appClassSelect" class="w-full bg-blue-900 text-white border border-blue-600 rounded px-2 py-1 focus:outline-none">
             <option value="ALL">MADARASA YOTE</option>
             <option value="AWALI">AWALI</option>
             <option value="I">DARASA I</option>
@@ -198,8 +170,6 @@
 
     <!-- VIEW 1: DASHBOARD HOME -->
     <main id="dashboardView" class="container mx-auto p-4 space-y-5">
-      
-      <!-- STAT CARDS -->
       <section class="grid grid-cols-2 gap-3">
         <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-3">
           <div class="bg-blue-100 text-blue-800 p-2.5 rounded-lg text-lg"><i class="fa-solid fa-users"></i></div>
@@ -208,7 +178,6 @@
             <h2 id="cardTotalStudents" class="text-base font-bold text-slate-800">0</h2>
           </div>
         </div>
-
         <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-3">
           <div class="bg-emerald-100 text-emerald-800 p-2.5 rounded-lg text-lg"><i class="fa-solid fa-file-pen"></i></div>
           <div>
@@ -218,7 +187,6 @@
         </div>
       </section>
 
-      <!-- QUICK MENU GRID -->
       <section class="space-y-2">
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Menyu Kuu</h3>
         <div class="grid grid-cols-2 gap-3">
@@ -226,24 +194,20 @@
             <i class="fa-solid fa-user-plus text-blue-700 text-2xl"></i>
             <span class="text-xs font-bold">1. Wanafunzi</span>
           </button>
-
           <button onclick="showSection('marksSection')" class="bg-white hover:bg-blue-50 text-slate-700 p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center space-y-1">
             <i class="fa-solid fa-calculator text-emerald-600 text-2xl"></i>
             <span class="text-xs font-bold">2. Ingiza Alama</span>
           </button>
-
           <button onclick="showSection('reportsSection')" class="bg-white hover:bg-blue-50 text-slate-700 p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center space-y-1">
             <i class="fa-solid fa-file-invoice text-purple-600 text-2xl"></i>
             <span class="text-xs font-bold">3. Ripoti / Cards</span>
           </button>
-
           <button onclick="showSection('smsSection')" class="bg-white hover:bg-blue-50 text-slate-700 p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center space-y-1">
             <i class="fa-solid fa-comment-sms text-indigo-600 text-2xl"></i>
             <span class="text-xs font-bold">4. SMS Mzazi</span>
           </button>
         </div>
       </section>
-
     </main>
 
     <!-- VIEW 2: STUDENT MANAGEMENT SECTION -->
@@ -255,26 +219,25 @@
         <h2 class="text-sm font-bold text-slate-800">USAJILI WA WANAFUNZI</h2>
       </div>
 
-      <!-- EXCEL BULK UPLOAD & TEMPLATE SECTION -->
+      <!-- BULK UPLOAD -->
       <section class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-2">
-        <h3 class="text-xs font-bold text-blue-900 uppercase"><i class="fa-solid fa-file-excel mr-1"></i> Usajili wa Pamoja (Bulk Registration)</h3>
-        <p class="text-[11px] text-slate-600">Download fomu ya Excel/CSV ujaze majina ukiwa offline, kisha ipakie hapa kusajili mara moja.</p>
-        
+        <h3 class="text-xs font-bold text-blue-900 uppercase"><i class="fa-solid fa-file-excel mr-1"></i> Usajili wa Pamoja</h3>
+        <p class="text-[11px] text-slate-600">Download fomu ya CSV ujaze majina offline, kisha ipakie hapa.</p>
         <div class="flex flex-wrap gap-2 pt-1">
           <button onclick="downloadStudentTemplate()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-3 py-1.5 rounded font-bold flex items-center space-x-1">
             <i class="fa-solid fa-download"></i> <span>Download Template</span>
           </button>
-
           <label class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer flex items-center space-x-1">
-            <i class="fa-solid fa-file-import"></i> <span>Pakia (Upload) CSV</span>
+            <i class="fa-solid fa-file-import"></i> <span>Pakia CSV</span>
             <input type="file" id="csvFileInput" accept=".csv" onchange="uploadStudentCSV(event)" class="hidden">
           </label>
         </div>
       </section>
 
-      <!-- FORM: ADD SINGLE STUDENT -->
+      <!-- FORM: ADD/EDIT STUDENT -->
       <form id="addStudentForm" class="bg-white p-4 rounded-xl border border-slate-200 space-y-3 shadow-sm">
-        <h3 class="text-xs font-bold text-blue-900 uppercase border-b pb-1">Sajili Mwanafunzi Mmoja Mmoja</h3>
+        <h3 id="formTitle" class="text-xs font-bold text-blue-900 uppercase border-b pb-1">Sajili Mwanafunzi Mpya</h3>
+        <input type="hidden" id="editStudentId">
         
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
@@ -328,21 +291,25 @@
           </div>
         </div>
 
-        <button type="submit" class="w-full bg-blue-900 text-white font-bold py-2 rounded-lg text-xs hover:bg-blue-800 transition flex items-center justify-center space-x-1">
-          <i class="fa-solid fa-plus-circle"></i>
-          <span>HIFADHI MWANAFUNZI</span>
-        </button>
-      </form>
-
-      <!-- STUDENT LIST TABLE & PDF EXPORT -->
-      <section class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-2">
-        <div class="flex justify-between items-center border-b pb-2">
-          <h3 class="text-xs font-bold text-slate-700 uppercase">Orodha ya Wanafunzi Waliosajiliwa</h3>
-          <button onclick="downloadStudentListPDF()" class="bg-red-700 hover:bg-red-800 text-white text-[11px] px-2.5 py-1 rounded font-bold flex items-center space-x-1">
-            <i class="fa-solid fa-file-pdf"></i> <span>Download PDF</span>
+        <div class="flex gap-2">
+          <button type="submit" id="saveStudentBtn" class="flex-1 bg-blue-900 text-white font-bold py-2 rounded-lg text-xs hover:bg-blue-800 transition flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span>HIFADHI MWANAFUNZI</span>
+          </button>
+          <button type="button" id="cancelEditBtn" onclick="resetStudentForm()" class="hidden bg-slate-400 text-white font-bold px-3 py-2 rounded-lg text-xs">
+            Ghairi
           </button>
         </div>
+      </form>
 
+      <!-- STUDENT LIST TABLE -->
+      <section class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-2">
+        <div class="flex justify-between items-center border-b pb-2">
+          <h3 class="text-xs font-bold text-slate-700 uppercase">Orodha ya Wanafunzi</h3>
+          <button onclick="downloadStudentListPDF()" class="bg-red-700 hover:bg-red-800 text-white text-[11px] px-2.5 py-1 rounded font-bold flex items-center space-x-1">
+            <i class="fa-solid fa-file-pdf"></i> <span>PDF</span>
+          </button>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs border-collapse">
             <thead>
@@ -351,12 +318,10 @@
                 <th class="p-2">Jina</th>
                 <th class="p-2">Class</th>
                 <th class="p-2">Simu Mzazi</th>
-                <th class="p-2 text-center">Kitendo</th>
+                <th class="p-2 text-center">Vitendo</th>
               </tr>
             </thead>
-            <tbody id="studentTableBody">
-              <!-- Data -->
-            </tbody>
+            <tbody id="studentTableBody"></tbody>
           </table>
         </div>
       </section>
@@ -368,15 +333,15 @@
         <button onclick="showSection('dashboardView')" class="text-xs font-bold text-blue-800 flex items-center space-x-1">
           <i class="fa-solid fa-arrow-left"></i> <span>Rudi Dashboard</span>
         </button>
-        <h2 class="text-sm font-bold text-slate-800">UINGIZAJI WA ALAMA ZA MASOMO</h2>
+        <h2 class="text-sm font-bold text-slate-800">UINGIZAJI WA ALAMA</h2>
       </div>
 
       <div class="bg-white p-4 rounded-xl border space-y-3 shadow-sm">
-        <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="grid grid-cols-3 gap-2 text-xs">
           <div>
-            <label class="block font-bold mb-1">Mchujio wa Darasa</label>
+            <label class="block font-bold mb-1">Darasa</label>
             <select id="marksClassFilter" onchange="loadStudentsForMarks()" class="w-full p-2 border rounded bg-slate-50">
-              <option value="">-- Chagua Darasa --</option>
+              <option value="">-- Chagua --</option>
               <option value="AWALI">AWALI</option>
               <option value="I">DARASA I</option>
               <option value="II">DARASA II</option>
@@ -388,33 +353,35 @@
             </select>
           </div>
           <div>
-            <label class="block font-bold mb-1">Aina ya Mtihani</label>
+            <label class="block font-bold mb-1">Mtihani</label>
             <select id="marksExamType" class="w-full p-2 border rounded bg-slate-50">
-              <option value="MID-TERM">MID-TERM EXAM</option>
-              <option value="TERMINAL">TERMINAL EXAM</option>
-              <option value="ANNUAL">ANNUAL EXAM</option>
+              <option value="MID-TERM">MID-TERM</option>
+              <option value="TERMINAL">TERMINAL</option>
+              <option value="ANNUAL">ANNUAL</option>
             </select>
+          </div>
+          <div class="flex items-end">
+            <button onclick="downloadMarksTemplate()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] py-2 px-1 rounded font-bold flex items-center justify-center space-x-1">
+              <i class="fa-solid fa-file-arrow-down"></i> <span>Smart Template</span>
+            </button>
           </div>
         </div>
 
+        <!-- UPLOAD FILLED MARKS TEMPLATE -->
+        <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg flex justify-between items-center text-xs">
+          <span class="text-emerald-900 font-semibold">Una template iliyojazwa? Pakia hapa:</span>
+          <label class="bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-1 rounded font-bold cursor-pointer">
+            Pakia Alama (CSV)
+            <input type="file" id="marksCsvInput" accept=".csv" onchange="uploadMarksCSV(event)" class="hidden">
+          </label>
+        </div>
+
         <div id="marksFormContainer" class="hidden space-y-4 pt-2">
-          <p class="text-xs text-blue-900 font-bold border-b pb-1">Ingiza Maksi za Kila Somo:</p>
+          <p id="subjectsInfoLabel" class="text-xs text-blue-900 font-bold border-b pb-1"></p>
           <div class="overflow-x-auto">
             <table class="w-full text-xs text-left border">
-              <thead class="bg-slate-100">
-                <tr>
-                  <th class="p-2 border">Jina la Mwanafunzi</th>
-                  <th class="p-2 border">KISW</th>
-                  <th class="p-2 border">ENG</th>
-                  <th class="p-2 border">HISAB</th>
-                  <th class="p-2 border">SAYANSI</th>
-                  <th class="p-2 border">MAARIFA</th>
-                  <th class="p-2 border">URAIA</th>
-                </tr>
-              </thead>
-              <tbody id="marksTableBody">
-                <!-- Data -->
-              </tbody>
+              <thead class="bg-slate-100" id="marksTableHead"></thead>
+              <tbody id="marksTableBody"></tbody>
             </table>
           </div>
           <button onclick="saveAllMarks()" class="w-full bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs hover:bg-emerald-800 transition">
@@ -424,21 +391,21 @@
       </div>
     </main>
 
-    <!-- VIEW 4: REPORTS & CARDS SECTION -->
+    <!-- VIEW 4: REPORTS SECTION -->
     <main id="reportsSection" class="container mx-auto p-4 space-y-4 hidden">
       <div class="flex justify-between items-center bg-white p-3 rounded-xl border shadow-sm no-print">
         <button onclick="showSection('dashboardView')" class="text-xs font-bold text-blue-800 flex items-center space-x-1">
           <i class="fa-solid fa-arrow-left"></i> <span>Rudi Dashboard</span>
         </button>
-        <h2 class="text-sm font-bold text-slate-800">RIPOTI ZA WANAFUNZI NA NAFASI</h2>
+        <h2 class="text-sm font-bold text-slate-800">RIPOTI NA NAFASI</h2>
       </div>
 
       <div class="bg-white p-3 rounded-xl border space-y-3 no-print">
-        <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="grid grid-cols-3 gap-2 text-xs">
           <div>
             <label class="block font-bold mb-1">Chagua Darasa</label>
             <select id="reportClassFilter" onchange="generateReportSummary()" class="w-full p-2 border rounded">
-              <option value="">-- Chagua Darasa --</option>
+              <option value="">-- Chagua --</option>
               <option value="AWALI">AWALI</option>
               <option value="I">DARASA I</option>
               <option value="II">DARASA II</option>
@@ -449,17 +416,23 @@
               <option value="VII">DARASA VII</option>
             </select>
           </div>
+          <div>
+            <label class="block font-bold mb-1">Mtindo wa PDF</label>
+            <select id="pdfFormatSelect" class="w-full p-2 border rounded bg-slate-50 font-bold text-blue-900">
+              <option value="necta">Format ya NECTA (Marksheet)</option>
+              <option value="standard">Format ya Kawaida (Cards)</option>
+            </select>
+          </div>
           <div class="flex items-end">
-            <button onclick="window.print()" class="w-full bg-blue-900 text-white font-bold p-2 rounded text-xs">
-              <i class="fa-solid fa-print mr-1"></i> PRINT RIPOTI
+            <button onclick="downloadResultsPDF()" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 px-1 rounded text-xs flex items-center justify-center space-x-1">
+              <i class="fa-solid fa-file-pdf"></i> <span>Download PDF</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- REPORT SUMMARY TABLE -->
       <div id="reportSummaryContainer" class="bg-white p-4 rounded-xl border space-y-3 hidden">
-        <h3 class="text-xs font-bold text-center text-blue-900 uppercase">MATOKEO NA NAFASI ZA WANAFUNZI</h3>
+        <h3 class="text-xs font-bold text-center text-blue-900 uppercase">MATOKEO NA NAFASI</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-xs text-left border border-collapse">
             <thead class="bg-slate-100">
@@ -472,28 +445,23 @@
                 <th class="p-2 border text-center no-print">Kadi</th>
               </tr>
             </thead>
-            <tbody id="reportTableBody">
-              <!-- Data -->
-            </tbody>
+            <tbody id="reportTableBody"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- SINGLE PRINTABLE REPORT CARD -->
       <div id="printableReportCard" class="hidden bg-white p-6 rounded-xl border border-slate-300 max-w-2xl mx-auto space-y-4">
         <div class="text-center border-b pb-3">
           <h2 class="font-bold text-lg text-blue-900">SHULE YA MSINGI MWASHIKU</h2>
           <p class="text-xs font-bold text-slate-600 uppercase">WILAYA YA IGUNGA – TABORA</p>
-          <p class="text-xs font-semibold text-blue-800 underline mt-1">RIPOTI YA MAENDELEO YA MWANAFUNZI</p>
+          <p class="text-xs font-semibold text-blue-800 underline mt-1">RIPOTI YA MAENDELEO</p>
         </div>
-
         <div class="grid grid-cols-2 text-xs gap-2 bg-slate-50 p-3 rounded">
-          <p><strong>Jina la Mwanafunzi:</strong> <span id="cardStuName"></span></p>
-          <p><strong>Prem/Adm No:</strong> <span id="cardStuAdm"></span></p>
+          <p><strong>Jina:</strong> <span id="cardStuName"></span></p>
+          <p><strong>Adm No:</strong> <span id="cardStuAdm"></span></p>
           <p><strong>Darasa:</strong> <span id="cardStuClass"></span></p>
-          <p><strong>Nafasi/Rank:</strong> <span id="cardStuRank" class="font-bold text-blue-900"></span></p>
+          <p><strong>Nafasi:</strong> <span id="cardStuRank" class="font-bold text-blue-900"></span></p>
         </div>
-
         <table class="w-full text-xs border text-left">
           <thead class="bg-slate-100">
             <tr>
@@ -504,19 +472,14 @@
           </thead>
           <tbody id="cardMarksBody"></tbody>
         </table>
-
         <div class="grid grid-cols-3 text-xs bg-blue-50 p-3 rounded text-center font-bold text-blue-900">
           <div>Jumla: <span id="cardTotal"></span></div>
           <div>Wastani: <span id="cardAvg"></span></div>
-          <div>Daraja la Jumla: <span id="cardGrade"></span></div>
+          <div>Daraja: <span id="cardGrade"></span></div>
         </div>
-
-        <div class="text-xs pt-4 border-t space-y-2">
-          <p><strong>Maoni ya Mwalimu Mkuu:</strong> Mwanafunzi amefanya kazi nzuri. Ongeza bidii zaidi.</p>
-          <div class="flex justify-between pt-4">
-            <span>Saini ya Mwalimu: ....................</span>
-            <span>Saini ya Mzazi: ....................</span>
-          </div>
+        <div class="text-xs pt-3 border-t space-y-1">
+          <p><strong>Maoni ya Mwalimu wa Darasa:</strong> <span id="cardTeacherComment" class="italic text-slate-700"></span></p>
+          <p><strong>Maoni ya Mwalimu Mkuu:</strong> <span id="cardHeadmasterComment" class="italic text-slate-700"></span></p>
         </div>
       </div>
     </main>
@@ -527,13 +490,12 @@
         <button onclick="showSection('dashboardView')" class="text-xs font-bold text-blue-800 flex items-center space-x-1">
           <i class="fa-solid fa-arrow-left"></i> <span>Rudi Dashboard</span>
         </button>
-        <h2 class="text-sm font-bold text-slate-800">TUMA SMS KWA WAZAZI</h2>
+        <h2 class="text-sm font-bold text-slate-800">SMS KWA WAZAZI</h2>
       </div>
-
       <div class="bg-white p-4 rounded-xl border space-y-3 shadow-sm">
-        <label class="block text-xs font-bold">Chagua Darasa la Kutuma SMS</label>
+        <label class="block text-xs font-bold">Chagua Darasa</label>
         <select id="smsClassFilter" onchange="loadSmsPreview()" class="w-full p-2 text-xs border rounded">
-          <option value="">-- Chagua Darasa --</option>
+          <option value="">-- Chagua --</option>
           <option value="AWALI">AWALI</option>
           <option value="I">DARASA I</option>
           <option value="II">DARASA II</option>
@@ -543,22 +505,127 @@
           <option value="VI">DARASA VI</option>
           <option value="VII">DARASA VII</option>
         </select>
-
         <div id="smsPreviewBox" class="hidden space-y-2">
-          <h3 class="text-xs font-bold text-slate-700">Preview ya SMS Zatakazotumwa:</h3>
+          <h3 class="text-xs font-bold text-slate-700">Preview ya SMS zenye Maoni na Matokeo:</h3>
           <div id="smsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
-          <button onclick="showAlert('SMS Zimetumwa!', 'SMS zimetumwa kwa wazazi wote kikamilifu.', 'success')" class="w-full bg-indigo-700 text-white font-bold py-2 rounded text-xs">
-            <i class="fa-solid fa-paper-plane mr-1"></i> TUMA SMS ZOTE
+          <button onclick="showAlert('Imetumwa', 'SMS zote zenye matokeo na maoni zimewekwa kwenye foleni ya kutumwa.', 'success')" class="w-full bg-indigo-700 text-white font-bold py-2 rounded text-xs">
+            TUMA SMS ZOTE KWA WAZAZI
           </button>
         </div>
       </div>
     </main>
-
   </div>
 
-  <!-- JAVASCRIPT ENGINE -->
   <script>
-    // SHOW / HIDE PASSWORD FUNCTION
+    /* ==========================================================
+     * 1. FIREBASE DATABASE CONFIGURATION & REALTIME SYNC
+     * ========================================================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5ao4-PCnwzmf3Q2FMHIF2JR4E15nRyWE",
+      authDomain: "mwashiku-results-system.firebaseapp.com",
+      databaseURL: "https://mwashiku-results-system-default-rtdb.firebaseio.com",
+      projectId: "mwashiku-results-system",
+      storageBucket: "mwashiku-results-system.firebasestorage.app",
+      messagingSenderId: "112620315988",
+      appId: "1:112620315988:web:f8c4baeafb342e6fe994c1",
+      measurementId: "G-832M61M5B1"
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    // Data Sync Arrays / State
+    let localStudents = [];
+    let localMarks = {};
+    let localTeachers = [];
+
+    // Realtime Listeners from Firebase
+    db.ref('mwashiku_students').on('value', (snapshot) => {
+      const data = snapshot.val();
+      localStudents = data ? Object.values(data) : [];
+      refreshDashboardData();
+      if (!document.getElementById('studentsSection').classList.contains('hidden')) renderStudentTable();
+    });
+
+    db.ref('mwashiku_marks').on('value', (snapshot) => {
+      localMarks = snapshot.val() || {};
+      refreshDashboardData();
+    });
+
+    db.ref('mwashiku_teachers').on('value', (snapshot) => {
+      const data = snapshot.val();
+      localTeachers = data ? Object.values(data) : [];
+    });
+
+    /* ==========================================================
+     * 2. SUBJECTS CONFIG PER CLASS LEVEL
+     * ========================================================== */
+    function getSubjectsForClass(className) {
+      if (['AWALI', 'I', 'II'].includes(className)) {
+        return [
+          { key: 'kuhesabu', name: 'Kuhesabu' },
+          { key: 'kuandika', name: 'Kuandika' },
+          { key: 'englishLang', name: 'Learning English Lang' },
+          { key: 'kusoma', name: 'Kusoma' },
+          { key: 'afya', name: 'Afya na Mazingira' },
+          { key: 'sanaa', name: 'Sanaa na Michezo' }
+        ];
+      } else if (['III', 'IV', 'V'].includes(className)) {
+        return [
+          { key: 'hisabati', name: 'Hisabati' },
+          { key: 'kiswahili', name: 'Kiswahili' },
+          { key: 'english', name: 'English' },
+          { key: 'sayansi', name: 'Sayansi' },
+          { key: 'jiografia', name: 'Jiografia na Mazingira' },
+          { key: 'sanaa', name: 'Sanaa na Michezo' },
+          { key: 'historia', name: 'Historia ya Tanzania na Maadili' }
+        ];
+      } else {
+        // VI & VII
+        return [
+          { key: 'english', name: 'English' },
+          { key: 'kiswahili', name: 'Kiswahili' },
+          { key: 'sayansi', name: 'Sayansi' },
+          { key: 'maarifa', name: 'Maarifa ya Jamii' },
+          { key: 'uraia', name: 'Uraia na Maadili' },
+          { key: 'hisabati', name: 'Hisabati' }
+        ];
+      }
+    }
+
+    // COMMENTS GENERATOR BASED ON GRADE
+    function getTeacherComments(grade) {
+      if (grade === 'A') {
+        return {
+          teacher: "Utendaji mzuri sana! Mwanafunzi anaelewa vizuri na anajituma.",
+          headmaster: "Hongera sana kwa ufaulu huu bora. Endelea hivi hivi!"
+        };
+      } else if (grade === 'B') {
+        return {
+          teacher: "Kazi nzuri. Anafanya vizuri lakini anaweza kufanya vizuri zaidi.",
+          headmaster: "Vizuri sana. Ongeza juhudi ili ufikie daraja la A."
+        };
+      } else if (grade === 'C') {
+        return {
+          teacher: "Ufaulu wa wastani. Anahitaji kuongeza umakini zaidi masomoni.",
+          headmaster: "Jitahidi kusoma kwa bidii zaidi ili kupandisha ufaulu wako."
+        };
+      } else if (grade === 'D') {
+        return {
+          teacher: "Ufaulu ni dhaifu. Anahitaji msaada wa ziada na mazoezi.",
+          headmaster: "Wazazi na walimu tushirikiane kumsaidia mwanafunzi huyu."
+        };
+      } else {
+        return {
+          teacher: "Yuko nyuma sana kimasomo. Anahitaji usimamizi wa karibu.",
+          headmaster: "Kazi kubwa inahitajika. Ahadi ya kuongeza masaa ya ziada ya kujisomea."
+        };
+      }
+    }
+
     function togglePassword(inputId, iconId) {
       const input = document.getElementById(inputId);
       const icon = document.getElementById(iconId);
@@ -576,16 +643,15 @@
     function updateOnlineStatus() {
       const statusDiv = document.getElementById('connectionStatus');
       if (navigator.onLine) {
-        statusDiv.textContent = "ONLINE MODE: Umeunganishwa na mtandao.";
+        statusDiv.textContent = "ONLINE MODE (Cloud Synced)";
         statusDiv.className = "bg-emerald-600 text-white text-center py-1 text-xs font-bold transition-all duration-300";
         setTimeout(() => { statusDiv.classList.add('hidden'); }, 3000);
       } else {
-        statusDiv.textContent = "OFFLINE MODE: Unafanya kazi bila mtandao. Data zote ziko salama!";
+        statusDiv.textContent = "OFFLINE MODE";
         statusDiv.className = "bg-amber-600 text-white text-center py-1 text-xs font-bold block transition-all duration-300";
         statusDiv.classList.remove('hidden');
       }
     }
-
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
 
@@ -610,9 +676,7 @@
       document.getElementById(mode + 'Form').classList.remove('hidden');
     }
 
-    function getUsersFromStorage() { return JSON.parse(localStorage.getItem('mwashiku_teachers')) || []; }
-    function saveUsersToStorage(users) { localStorage.setItem('mwashiku_teachers', JSON.stringify(users)); }
-
+    // AUTH HANDLERS
     document.getElementById('registerForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const fullName = document.getElementById('regFullName').value.trim();
@@ -620,25 +684,29 @@
       const pin = document.getElementById('regPin').value.trim();
       const password = document.getElementById('regPassword').value;
 
-      let users = getUsersFromStorage();
-      if (users.find(u => u.username === username)) {
+      if (localTeachers.find(u => u.username === username)) {
         showAlert('Kosa!', 'Username hii ipo tayari.', 'error'); return;
       }
-      users.push({ fullName, username, pin, password });
-      saveUsersToStorage(users);
-      showToast('Usajili Umekamilika!');
-      this.reset(); switchAuthMode('login');
+
+      db.ref('mwashiku_teachers/' + username).set({ fullName, username, pin, password }, (error) => {
+        if (!error) {
+          showToast('Usajili Umekamilika!');
+          this.reset(); switchAuthMode('login');
+        } else {
+          showAlert('Kosa', error.message, 'error');
+        }
+      });
     });
 
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim().toLowerCase();
       const password = document.getElementById('loginPassword').value;
-      const user = getUsersFromStorage().find(u => u.username === username && u.password === password);
+      const user = localTeachers.find(u => u.username === username && u.password === password);
 
       if (user) {
         localStorage.setItem('mwashiku_active_user', JSON.stringify(user));
-        showToast(`Karibu Mwalimu ${user.fullName}`);
+        showToast(`Karibu ${user.fullName}`);
         initAppSession(user);
       } else {
         showAlert('Kosa!', 'Username au Password siyo sahihi.', 'error');
@@ -651,27 +719,27 @@
       const pin = document.getElementById('resetPin').value.trim();
       const newPassword = document.getElementById('resetNewPassword').value;
 
-      let users = getUsersFromStorage();
-      const idx = users.findIndex(u => u.username === username && u.pin === pin);
-      if (idx !== -1) {
-        users[idx].password = newPassword;
-        saveUsersToStorage(users);
-        showAlert('Safi!', 'Nenosiri limebadilishwa kikamilifu.', 'success');
-        this.reset(); switchAuthMode('login');
+      const teacher = localTeachers.find(u => u.username === username && u.pin === pin);
+      if (teacher) {
+        db.ref('mwashiku_teachers/' + username).update({ password: newPassword }, (error) => {
+          if (!error) {
+            showAlert('Safi!', 'Nenosiri limebadilishwa.', 'success');
+            this.reset(); switchAuthMode('login');
+          }
+        });
       } else {
         showAlert('Kosa!', 'Username au PIN sivyo sahihi.', 'error');
       }
     });
 
-    // STUDENTS LOGIC
-    function getStudentsFromStorage() { return JSON.parse(localStorage.getItem('mwashiku_students')) || []; }
-    function saveStudentsToStorage(s) { localStorage.setItem('mwashiku_students', JSON.stringify(s)); }
-
+    // STUDENTS & EDIT LOGIC (SYNCED WITH FIREBASE)
     document.getElementById('addStudentForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      let students = getStudentsFromStorage();
-      students.push({
-        id: Date.now(),
+      const editId = document.getElementById('editStudentId').value;
+      const studentId = editId ? editId : 'STU_' + Date.now();
+
+      const studentData = {
+        id: studentId,
         admNo: document.getElementById('stuAdmNo').value.trim(),
         fullName: document.getElementById('stuFullName').value.trim().toUpperCase(),
         gender: document.getElementById('stuGender').value,
@@ -679,67 +747,105 @@
         year: document.getElementById('stuYear').value,
         parentName: document.getElementById('stuParentName').value.trim(),
         parentPhone: document.getElementById('stuParentPhone').value.trim()
+      };
+
+      db.ref('mwashiku_students/' + studentId).set(studentData, (error) => {
+        if (!error) {
+          showToast(editId ? 'Taarifa zimebadilishwa!' : 'Mwanafunzi amesajiliwa!');
+          resetStudentForm();
+          renderStudentTable();
+          refreshDashboardData();
+        }
       });
-      saveStudentsToStorage(students);
-      showToast('Mwanafunzi amesajiliwa!');
-      this.reset(); renderStudentTable(); refreshDashboardData();
     });
 
+    function editStudent(id) {
+      const s = localStudents.find(item => String(item.id) === String(id));
+      if (!s) return;
+
+      document.getElementById('editStudentId').value = s.id;
+      document.getElementById('stuAdmNo').value = s.admNo;
+      document.getElementById('stuFullName').value = s.fullName;
+      document.getElementById('stuGender').value = s.gender;
+      document.getElementById('stuClass').value = s.className;
+      document.getElementById('stuYear').value = s.year;
+      document.getElementById('stuParentName').value = s.parentName;
+      document.getElementById('stuParentPhone').value = s.parentPhone;
+
+      document.getElementById('formTitle').innerText = "Hariri Taarifa za Mwanafunzi";
+      document.getElementById('saveStudentBtn').innerHTML = `<i class="fa-solid fa-pen-to-square mr-1"></i> UPDATE`;
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+      document.getElementById('addStudentForm').scrollIntoView();
+    }
+
+    function resetStudentForm() {
+      document.getElementById('addStudentForm').reset();
+      document.getElementById('editStudentId').value = '';
+      document.getElementById('formTitle').innerText = "Sajili Mwanafunzi Mpya";
+      document.getElementById('saveStudentBtn').innerHTML = `<i class="fa-solid fa-plus-circle mr-1"></i> HIFADHI`;
+      document.getElementById('cancelEditBtn').classList.add('hidden');
+    }
+
     function deleteStudent(id) {
-      let students = getStudentsFromStorage().filter(s => s.id !== id);
-      saveStudentsToStorage(students);
-      renderStudentTable(); refreshDashboardData();
-      showToast('Mwanafunzi ameondolewa.', 'info');
+      Swal.fire({
+        title: 'Una uhakika?',
+        text: "Mwanafunzi huyu atafutwa kwenye mfumo wa wingu.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Ndiyo, Futa'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          db.ref('mwashiku_students/' + id).remove().then(() => {
+            renderStudentTable(); refreshDashboardData();
+            showToast('Mwanafunzi ameondolewa.', 'info');
+          });
+        }
+      });
     }
 
     function renderStudentTable() {
-      const students = getStudentsFromStorage();
       const tbody = document.getElementById('studentTableBody');
-      tbody.innerHTML = students.length === 0 ? `<tr><td colspan="5" class="text-center p-3 text-slate-400">Hakuna mwanafunzi aliyesajiliwa.</td></tr>` : '';
-      students.forEach(s => {
+      tbody.innerHTML = localStudents.length === 0 ? `<tr><td colspan="5" class="text-center p-3 text-slate-400">Hakuna mwanafunzi aliyesajiliwa.</td></tr>` : '';
+      localStudents.forEach(s => {
         tbody.innerHTML += `
           <tr class="border-b hover:bg-slate-50">
             <td class="p-2 font-bold">${s.admNo}</td>
             <td class="p-2">${s.fullName}</td>
             <td class="p-2">${s.className}</td>
             <td class="p-2">${s.parentPhone}</td>
-            <td class="p-2 text-center">
-              <button onclick="deleteStudent(${s.id})" class="text-red-600"><i class="fa-solid fa-trash"></i></button>
+            <td class="p-2 text-center space-x-2">
+              <button onclick="editStudent('${s.id}')" class="text-blue-600 hover:text-blue-800" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="deleteStudent('${s.id}')" class="text-red-600 hover:text-red-800" title="Delete"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>`;
       });
     }
 
-    // DOWNLOAD TEMPLATE FOR BULK UPLOAD
     function downloadStudentTemplate() {
-      const csvContent = "data:text/csv;charset=utf-8,AdmNo,FullName,Gender,Class,Year,ParentName,ParentPhone\nMW/2026/001,JOHN YOHANA,M,IV,2026,Yohana Malole,0764437443\nMW/2026/002,MARY PAUL,F,IV,2026,Paul Joseph,0764124875";
+      const csvContent = "data:text/csv;charset=utf-8,AdmNo,FullName,Gender,Class,Year,ParentName,ParentPhone\nMW/2026/001,JOHN YOHANA,M,IV,2026,Yohana Malole,0764437443";
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
       link.setAttribute("download", "mwashiku_student_template.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
-    // UPLOAD CSV FUNCTION
     function uploadStudentCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
         const lines = e.target.result.split('\n');
-        let students = getStudentsFromStorage();
-        let addedCount = 0;
-
+        let count = 0;
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
           if (line) {
             const cols = line.split(',');
             if (cols.length >= 7) {
-              students.push({
-                id: Date.now() + i,
+              const id = 'STU_' + Date.now() + i;
+              const studentData = {
+                id: id,
                 admNo: cols[0].trim(),
                 fullName: cols[1].trim().toUpperCase(),
                 gender: cols[2].trim().toUpperCase(),
@@ -747,44 +853,26 @@
                 year: cols[4].trim(),
                 parentName: cols[5].trim(),
                 parentPhone: cols[6].trim()
-              });
-              addedCount++;
+              };
+              db.ref('mwashiku_students/' + id).set(studentData);
+              count++;
             }
           }
         }
-        saveStudentsToStorage(students);
-        renderStudentTable(); refreshDashboardData();
-        showAlert('Umefanikiwa!', `Wanafunzi ${addedCount} wamesajiliwa kutoka kwenye faili la CSV.`, 'success');
+        showAlert('Imekamilika!', `Wanafunzi ${count} wamesajiliwa kwenye wingu.`, 'success');
       };
       reader.readAsText(file);
     }
 
-    // DOWNLOAD STUDENT LIST AS PDF
     function downloadStudentListPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      const students = getStudentsFromStorage();
+      if (localStudents.length === 0) { showAlert('Taarifa', 'Hakuna wanafunzi.', 'info'); return; }
 
-      if (students.length === 0) {
-        showAlert('Taarifa', 'Hakuna wanafunzi wa kudownload PDF.', 'info');
-        return;
-      }
+      doc.setFontSize(14); doc.text("SHULE YA MSINGI MWASHIKU - IGUNGA TABORA", 14, 15);
+      doc.setFontSize(10); doc.text("ORODHA YA WANAFUNZI", 14, 22);
 
-      doc.setFontSize(14);
-      doc.text("SHULE YA MSINGI MWASHIKU - IGUNGA TABORA", 14, 15);
-      doc.setFontSize(10);
-      doc.text("ORODHA YA WANAFUNZI WALIOSAILIWA", 14, 22);
-
-      const tableData = students.map((s, index) => [
-        index + 1,
-        s.admNo,
-        s.fullName,
-        s.gender,
-        s.className,
-        s.parentName,
-        s.parentPhone
-      ]);
-
+      const tableData = localStudents.map((s, idx) => [idx + 1, s.admNo, s.fullName, s.gender, s.className, s.parentName, s.parentPhone]);
       doc.autoTable({
         startY: 28,
         head: [['#', 'Adm No', 'Jina Kamili', 'Jinsia', 'Darasa', 'Mzazi', 'Simu']],
@@ -792,67 +880,120 @@
         theme: 'striped',
         headStyles: { fillColor: [30, 58, 138] }
       });
-
       doc.save('Orodha_ya_Wanafunzi_Mwashiku.pdf');
     }
 
-    // MARKS LOGIC
-    function getMarksFromStorage() { return JSON.parse(localStorage.getItem('mwashiku_marks')) || {}; }
-    function saveMarksToStorage(m) { localStorage.setItem('mwashiku_marks', JSON.stringify(m)); }
-
+    // SMART MARKS TEMPLATE & UPLOAD
     function loadStudentsForMarks() {
       const selectedClass = document.getElementById('marksClassFilter').value;
       const container = document.getElementById('marksFormContainer');
+      const thead = document.getElementById('marksTableHead');
       const tbody = document.getElementById('marksTableBody');
-      tbody.innerHTML = '';
+      thead.innerHTML = ''; tbody.innerHTML = '';
 
       if (!selectedClass) { container.classList.add('hidden'); return; }
 
-      const students = getStudentsFromStorage().filter(s => s.className === selectedClass);
+      const students = localStudents.filter(s => s.className === selectedClass);
       if (students.length === 0) {
-        showAlert('Taarifa', 'Hakuna wanafunzi waliosajiliwa kwenye darasa hili bado.');
+        showAlert('Taarifa', 'Hakuna wanafunzi kwenye darasa hili.');
         container.classList.add('hidden'); return;
       }
 
-      const allMarks = getMarksFromStorage();
+      const subjects = getSubjectsForClass(selectedClass);
+      document.getElementById('subjectsInfoLabel').innerText = `Masomo: ${subjects.map(sub => sub.name).join(', ')}`;
+
+      let headHTML = `<tr><th class="p-2 border">Mwanafunzi</th>`;
+      subjects.forEach(sub => { headHTML += `<th class="p-2 border text-center">${sub.name}</th>`; });
+      headHTML += `</tr>`; thead.innerHTML = headHTML;
+
       students.forEach(s => {
-        const m = allMarks[s.id] || { kisw: 0, eng: 0, hisab: 0, sayansi: 0, maarifa: 0, uraia: 0 };
-        tbody.innerHTML += `
-          <tr class="border-b" data-stuid="${s.id}">
-            <td class="p-2 font-bold">${s.fullName}</td>
-            <td class="p-1"><input type="number" class="w-12 p-1 border rounded text-center kisw" value="${m.kisw}"></td>
-            <td class="p-1"><input type="number" class="w-12 p-1 border rounded text-center eng" value="${m.eng}"></td>
-            <td class="p-1"><input type="number" class="w-12 p-1 border rounded text-center hisab" value="${m.hisab}"></td>
-            <td class="p-1"><input type="number" class="w-12 p-1 border rounded text-center sayansi" value="${m.sayansi}"></td>
-            <td class="p-1"><input type="number" class="w-12 p-1 border rounded text-center maarifa" value="${m.maarifa}"></td>
-            <td class="p-1"><input type="number" class="w-12 p-1 border rounded text-center uraia" value="${m.uraia}"></td>
-          </tr>`;
+        const m = localMarks[s.id] || {};
+        let rowHTML = `<tr class="border-b" data-stuid="${s.id}"><td class="p-2 font-bold">${s.fullName}</td>`;
+        subjects.forEach(sub => {
+          let val = m[sub.key] !== undefined ? m[sub.key] : 0;
+          rowHTML += `<td class="p-1"><input type="number" class="w-16 p-1 border rounded text-center mark-input ${sub.key}" value="${val}"></td>`;
+        });
+        rowHTML += `</tr>`; tbody.innerHTML += rowHTML;
       });
       container.classList.remove('hidden');
     }
 
+    function downloadMarksTemplate() {
+      const selectedClass = document.getElementById('marksClassFilter').value;
+      if (!selectedClass) { showAlert('Makosa', 'Chagua darasa kwanza.', 'warning'); return; }
+
+      const students = localStudents.filter(s => s.className === selectedClass);
+      if (students.length === 0) { showAlert('Taarifa', 'Hakuna wanafunzi.', 'info'); return; }
+
+      const subjects = getSubjectsForClass(selectedClass);
+      let csvHeader = "StudentID,AdmNo,FullName," + subjects.map(sub => sub.key).join(",") + "\n";
+      let csvRows = students.map(s => `${s.id},${s.admNo},"${s.fullName}",` + subjects.map(() => "0").join(",")).join("\n");
+
+      const csvContent = "data:text/csv;charset=utf-8," + csvHeader + csvRows;
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Smart_Marks_Template_${selectedClass}.csv`);
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function uploadMarksCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const lines = e.target.result.split('\n');
+        if (lines.length < 2) return;
+        const headers = lines[0].split(',').map(h => h.trim());
+
+        let allMarks = { ...localMarks };
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line) {
+            const cols = line.split(',');
+            const stuId = cols[0].trim();
+            if (stuId && localStudents.find(s => s.id === stuId)) {
+              let stuMarks = allMarks[stuId] || {};
+              for (let j = 3; j < headers.length; j++) {
+                const subKey = headers[j];
+                const markVal = Number(cols[j]) || 0;
+                stuMarks[subKey] = markVal;
+              }
+              allMarks[stuId] = stuMarks;
+            }
+          }
+        }
+        db.ref('mwashiku_marks').set(allMarks).then(() => {
+          showAlert('Imefanikiwa!', 'Alama zote zimepakiwa na kusawazishwa kwenye wingu.', 'success');
+          loadStudentsForMarks();
+        });
+      };
+      reader.readAsText(file);
+    }
+
     function saveAllMarks() {
+      const selectedClass = document.getElementById('marksClassFilter').value;
+      const subjects = getSubjectsForClass(selectedClass);
       const rows = document.querySelectorAll('#marksTableBody tr');
-      let allMarks = getMarksFromStorage();
+      let allMarks = { ...localMarks };
 
       rows.forEach(row => {
         const stuId = row.dataset.stuid;
-        allMarks[stuId] = {
-          kisw: Number(row.querySelector('.kisw').value) || 0,
-          eng: Number(row.querySelector('.eng').value) || 0,
-          hisab: Number(row.querySelector('.hisab').value) || 0,
-          sayansi: Number(row.querySelector('.sayansi').value) || 0,
-          maarifa: Number(row.querySelector('.maarifa').value) || 0,
-          uraia: Number(row.querySelector('.uraia').value) || 0
-        };
+        let stuMarks = allMarks[stuId] || {};
+        subjects.forEach(sub => {
+          const input = row.querySelector(`.${sub.key}`);
+          stuMarks[sub.key] = input ? Number(input.value) || 0 : 0;
+        });
+        allMarks[stuId] = stuMarks;
       });
 
-      saveMarksToStorage(allMarks);
-      showToast('Alama zote zimehifadhiwa kikamilifu!');
-      refreshDashboardData();
+      db.ref('mwashiku_marks').set(allMarks).then(() => {
+        showToast('Alama zimehifadhiwa kwenye mtandao!');
+        refreshDashboardData();
+      });
     }
 
-    // REPORTS LOGIC
+    // GRADING & REPORTS
     function calculateGrade(avg, className) {
       const isLowClass = ['AWALI', 'I', 'II'].includes(className);
       if (isLowClass) {
@@ -870,13 +1011,14 @@
 
       if (!selectedClass) { container.classList.add('hidden'); return; }
 
-      const students = getStudentsFromStorage().filter(s => s.className === selectedClass);
-      const allMarks = getMarksFromStorage();
+      const students = localStudents.filter(s => s.className === selectedClass);
+      const subjects = getSubjectsForClass(selectedClass);
 
       let results = students.map(s => {
-        const m = allMarks[s.id] || { kisw: 0, eng: 0, hisab: 0, sayansi: 0, maarifa: 0, uraia: 0 };
-        const total = m.kisw + m.eng + m.hisab + m.sayansi + m.maarifa + m.uraia;
-        const avg = Number((total / 6).toFixed(1));
+        const m = localMarks[s.id] || {};
+        let total = 0;
+        subjects.forEach(sub => { total += Number(m[sub.key]) || 0; });
+        const avg = Number((total / subjects.length).toFixed(1));
         return { ...s, marks: m, total, avg, grade: calculateGrade(avg, selectedClass) };
       });
 
@@ -895,62 +1037,104 @@
             </td>
           </tr>`;
       });
-
       container.classList.remove('hidden');
     }
 
     function viewReportCard(stuId, rank, totalStudents) {
-      const students = getStudentsFromStorage();
-      const student = students.find(s => String(s.id) === String(stuId));
-      const m = (getMarksFromStorage())[stuId] || { kisw: 0, eng: 0, hisab: 0, sayansi: 0, maarifa: 0, uraia: 0 };
-      
-      const total = m.kisw + m.eng + m.hisab + m.sayansi + m.maarifa + m.uraia;
-      const avg = (total / 6).toFixed(1);
+      const student = localStudents.find(s => String(s.id) === String(stuId));
+      const m = localMarks[stuId] || {};
+      const subjects = getSubjectsForClass(student.className);
+
+      let total = 0; let marksHtml = '';
+      subjects.forEach(sub => {
+        let val = Number(m[sub.key]) || 0; total += val;
+        marksHtml += `<tr><td class="p-2 border">${sub.name}</td><td class="p-2 border">${val}</td><td class="p-2 border">${calculateGrade(val, student.className)}</td></tr>`;
+      });
+
+      const avg = (total / subjects.length).toFixed(1);
       const grade = calculateGrade(avg, student.className);
+      const comments = getTeacherComments(grade);
 
       document.getElementById('cardStuName').innerText = student.fullName;
       document.getElementById('cardStuAdm').innerText = student.admNo;
       document.getElementById('cardStuClass').innerText = student.className;
       document.getElementById('cardStuRank').innerText = `${rank} kati ya ${totalStudents}`;
-
-      document.getElementById('cardMarksBody').innerHTML = `
-        <tr><td class="p-2 border">Kiswahili</td><td class="p-2 border">${m.kisw}</td><td class="p-2 border">${calculateGrade(m.kisw, student.className)}</td></tr>
-        <tr><td class="p-2 border">English</td><td class="p-2 border">${m.eng}</td><td class="p-2 border">${calculateGrade(m.eng, student.className)}</td></tr>
-        <tr><td class="p-2 border">Hisabati</td><td class="p-2 border">${m.hisab}</td><td class="p-2 border">${calculateGrade(m.hisab, student.className)}</td></tr>
-        <tr><td class="p-2 border">Sayansi</td><td class="p-2 border">${m.sayansi}</td><td class="p-2 border">${calculateGrade(m.sayansi, student.className)}</td></tr>
-        <tr><td class="p-2 border">Maarifa ya Jamii</td><td class="p-2 border">${m.maarifa}</td><td class="p-2 border">${calculateGrade(m.maarifa, student.className)}</td></tr>
-        <tr><td class="p-2 border">Uraia na Maadili</td><td class="p-2 border">${m.uraia}</td><td class="p-2 border">${calculateGrade(m.uraia, student.className)}</td></tr>
-      `;
-
+      document.getElementById('cardMarksBody').innerHTML = marksHtml;
       document.getElementById('cardTotal').innerText = total;
       document.getElementById('cardAvg').innerText = avg;
       document.getElementById('cardGrade').innerText = grade;
+      document.getElementById('cardTeacherComment').innerText = comments.teacher;
+      document.getElementById('cardHeadmasterComment').innerText = comments.headmaster;
 
       document.getElementById('printableReportCard').classList.remove('hidden');
       document.getElementById('printableReportCard').scrollIntoView();
     }
 
-    // SMS PREVIEW LOGIC
+    // DOWNLOAD PDF WITH CHOICES (NECTA OR STANDARD)
+    function downloadResultsPDF() {
+      const format = document.getElementById('pdfFormatSelect').value;
+      const selectedClass = document.getElementById('reportClassFilter').value;
+      if (!selectedClass) { showAlert('Taarifa', 'Chagua darasa kwanza.', 'warning'); return; }
+
+      const students = localStudents.filter(s => s.className === selectedClass);
+      const subjects = getSubjectsForClass(selectedClass);
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(14); doc.text("SHULE YA MSINGI MWASHIKU - IGUNGA TABORA", 14, 15);
+      doc.setFontSize(10); doc.text(`RIPOTI YA MATOKEO - DARASA LA ${selectedClass}`, 14, 22);
+
+      if (format === 'necta') {
+        let headRow = ['#', 'Adm', 'Jina la Mwanafunzi'];
+        subjects.forEach(sub => headRow.push(sub.name.substring(0, 5)));
+        headRow.push('Jumla', 'Wast', 'Dar');
+
+        let tableData = students.map((s, idx) => {
+          let row = [idx + 1, s.admNo, s.fullName];
+          let m = localMarks[s.id] || {}; let tot = 0;
+          subjects.forEach(sub => { let v = Number(m[sub.key]) || 0; tot += v; row.push(v); });
+          let av = (tot / subjects.length).toFixed(1);
+          row.push(tot, av, calculateGrade(av, selectedClass));
+          return row;
+        });
+
+        doc.autoTable({ startY: 28, head: [headRow], body: tableData, theme: 'grid', headStyles: { fillColor: [30, 58, 138] }, styles: { fontSize: 8 } });
+        doc.save(`Matokeo_NECTA_Darasa_${selectedClass}.pdf`);
+      } else {
+        let tableData = students.map((s, idx) => {
+          let m = localMarks[s.id] || {}; let tot = 0;
+          subjects.forEach(sub => tot += Number(m[sub.key]) || 0);
+          let av = (tot / subjects.length).toFixed(1);
+          return [idx + 1, s.admNo, s.fullName, tot, av, calculateGrade(av, selectedClass)];
+        });
+
+        doc.autoTable({ startY: 28, head: [['#', 'Adm No', 'Jina Kamili', 'Jumla', 'Wastani', 'Daraja']], body: tableData, theme: 'striped', headStyles: { fillColor: [30, 58, 138] } });
+        doc.save(`Orodha_Matokeo_Darasa_${selectedClass}.pdf`);
+      }
+    }
+
     function loadSmsPreview() {
       const cls = document.getElementById('smsClassFilter').value;
       const box = document.getElementById('smsPreviewBox');
       const list = document.getElementById('smsList');
       list.innerHTML = '';
-
       if (!cls) { box.classList.add('hidden'); return; }
 
-      const students = getStudentsFromStorage().filter(s => s.className === cls);
-      const allMarks = getMarksFromStorage();
+      const students = localStudents.filter(s => s.className === cls);
+      const subjects = getSubjectsForClass(cls);
 
       students.forEach(s => {
-        const m = allMarks[s.id] || { kisw: 0, eng: 0, hisab: 0, sayansi: 0, maarifa: 0, uraia: 0 };
-        const total = m.kisw + m.eng + m.hisab + m.sayansi + m.maarifa + m.uraia;
-        const avg = (total / 6).toFixed(1);
+        const m = localMarks[s.id] || {};
+        let total = 0;
+        subjects.forEach(sub => { total += Number(m[sub.key]) || 0; });
+        const avg = (total / subjects.length).toFixed(1);
+        const grade = calculateGrade(avg, cls);
+        const comments = getTeacherComments(grade);
 
         list.innerHTML += `
-          <div class="bg-slate-100 p-2 rounded text-xs border">
-            <p class="font-bold text-blue-900">Kwa: ${s.parentName} (${s.parentPhone})</p>
-            <p class="text-slate-700 italic mt-0.5">"Heshima kwako mzazi. Mwanafunzi ${s.fullName} (Darasa la ${s.className}) amepata Jumla ya Maksi: ${total}, Wastani: ${avg}. Shule ya Msingi Mwashiku, Igunga."</p>
+          <div class="bg-slate-100 p-2.5 rounded text-xs border space-y-1">
+            <p class="font-bold text-blue-900">Kwa Mzazi wa: ${s.fullName} (${s.parentPhone})</p>
+            <p class="text-slate-700 italic">"Mwanafunzi wako amepata Jumla: ${total}, Wastani: ${avg}, Daraja: ${grade}. Maoni ya Mwalimu: ${comments.teacher} Maoni ya Mkuu: ${comments.headmaster} - Mwashiku Primary"</p>
           </div>`;
       });
       box.classList.remove('hidden');
@@ -966,13 +1150,14 @@
     function logoutUser() {
       localStorage.removeItem('mwashiku_active_user');
       document.getElementById('appSection').classList.add('hidden');
+      document.getElementById('authSection').classList.add('hidden'); // Fix toggle
       document.getElementById('authSection').classList.remove('hidden');
       switchAuthMode('login'); showToast('Umetoka mfumoni.', 'info');
     }
 
     function refreshDashboardData() {
-      document.getElementById('cardTotalStudents').innerText = getStudentsFromStorage().length;
-      document.getElementById('cardTotalResults').innerText = Object.keys(getMarksFromStorage()).length;
+      document.getElementById('cardTotalStudents').innerText = localStudents.length;
+      document.getElementById('cardTotalResults').innerText = Object.keys(localMarks).length;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
