@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shule ya Msingi Mwashiku - Igunga Tabora</title><Elimu Ni ufunguo wa Maisha>
+  <title>Shule ya Msingi Mwashiku - Igunga Tabora</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -78,8 +78,8 @@
           <input type="text" id="regFullName" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. Yohana Masalu">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
-          <input type="text" id="regUsername" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. mwalimuyohana">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Username (Bila nafasi au email)</label>
+          <input type="text" id="regUsername" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Mf. yohana">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Security PIN (Tarakimu 4)</label>
@@ -673,24 +673,33 @@
       document.getElementById(mode + 'Form').classList.remove('hidden');
     }
 
-    // AUTH HANDLERS (FIXED TO SAVE & READ DIRECTLY FROM FIREBASE)
+    // AUTH HANDLERS (IMEDHIBITIWA ILI KUZUIA KUGANDA KWA FORM)
     document.getElementById('registerForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const fullName = document.getElementById('regFullName').value.trim();
-      const username = document.getElementById('regUsername').value.trim().toLowerCase();
+      const username = document.getElementById('regUsername').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
       const pin = document.getElementById('regPin').value.trim();
       const password = document.getElementById('regPassword').value;
 
-      if (localTeachers.find(u => u.username === username)) {
-        showAlert('Kosa!', 'Username hii ipo tayari.', 'error'); return;
+      if (!username) {
+        showAlert('Kosa!', 'Tafadhali weka Username sahihi isiyo na nafasi wala alama za barua pepe (Mf. yohana).', 'error');
+        return;
       }
+
+      if (localTeachers.find(u => u.username === username)) {
+        showAlert('Kosa!', 'Username hii ipo tayari. Tumia nyingine.', 'error'); 
+        return;
+      }
+
+      showToast('Inatuma taarifa kwenye mfumo...');
 
       db.ref('mwashiku_teachers/' + username).set({ fullName, username, pin, password }, (error) => {
         if (!error) {
           showAlert('Imefanikiwa!', 'Usajili umekamilika! Sasa unaweza kuingia mfumoni.', 'success');
-          this.reset(); switchAuthMode('login');
+          this.reset(); 
+          switchAuthMode('login');
         } else {
-          showAlert('Kosa', error.message, 'error');
+          showAlert('Kosa la Mtandao', error.message, 'error');
         }
       });
     });
