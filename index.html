@@ -673,7 +673,7 @@
       document.getElementById(mode + 'Form').classList.remove('hidden');
     }
 
-    // AUTH HANDLERS
+    // AUTH HANDLERS (FIXED TO SAVE & READ DIRECTLY FROM FIREBASE)
     document.getElementById('registerForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const fullName = document.getElementById('regFullName').value.trim();
@@ -687,7 +687,7 @@
 
       db.ref('mwashiku_teachers/' + username).set({ fullName, username, pin, password }, (error) => {
         if (!error) {
-          showToast('Usajili Umekamilika!');
+          showAlert('Imefanikiwa!', 'Usajili umekamilika! Sasa unaweza kuingia mfumoni.', 'success');
           this.reset(); switchAuthMode('login');
         } else {
           showAlert('Kosa', error.message, 'error');
