@@ -367,7 +367,7 @@
       <!-- STUDENT LIST TABLE -->
       <section class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
         <div class="flex justify-between items-center border-b pb-2">
-          <h3 class="text-xs font-bold text-slate-700 uppercase">Orodha ya Wanafunzi</h3>
+          <h3 class="text-xs font-bold text-slate-700 uppercase">Orodha ya Wanafunzi (Wamepangwa A-Z)</h3>
           <button onclick="downloadStudentListPDF()" class="bg-red-700 hover:bg-red-800 text-white text-xs px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1">
             <i class="fa-solid fa-file-pdf"></i> <span>Download PDF</span>
           </button>
@@ -425,14 +425,14 @@
           </div>
           <div class="flex items-end">
             <button onclick="downloadMarksTemplate()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs py-2.5 px-2 rounded-xl font-bold flex items-center justify-center space-x-1">
-              <i class="fa-solid fa-file-arrow-down"></i> <span>Smart Template</span>
+              <i class="fa-solid fa-file-arrow-down"></i> <span>Smart Template (Darasa Husika)</span>
             </button>
           </div>
         </div>
 
         <!-- UPLOAD FILLED MARKS TEMPLATE -->
         <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex justify-between items-center text-xs">
-          <span class="text-emerald-900 font-semibold">Una template iliyojazwa? Mfumo utapuuza wanafunzi wasiosajiliwa.</span>
+          <span class="text-emerald-900 font-semibold">Pakia template maalum ya darasa husika. Wanafunzi wasiosajiliwa watakataliwa.</span>
           <label class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-1.5 rounded-xl font-bold cursor-pointer">
             Pakia Alama (CSV)
             <input type="file" id="marksCsvInput" accept=".csv" onchange="uploadMarksCSV(event)" class="hidden">
@@ -648,10 +648,11 @@
     let localLogs = [];
     let activeUser = null;
 
-    // Realtime Listeners
+    // Realtime Listeners with Alphabetical Sorting (A-Z)
     db.ref('mwashiku_students').on('value', (snapshot) => {
       const data = snapshot.val();
-      localStudents = data ? Object.values(data) : [];
+      let rawStudents = data ? Object.values(data) : [];
+      localStudents = rawStudents.sort((a, b) => a.fullName.localeCompare(b.fullName));
       refreshDashboardData();
       if (!document.getElementById('studentsSection').classList.contains('hidden')) renderStudentTable();
     });
@@ -873,7 +874,6 @@
       const editId = document.getElementById('editStudentId').value;
       const admNo = document.getElementById('stuAdmNo').value.trim();
 
-      // DUPLICATE ADM NO CHECK FOR NEW STUDENTS
       if (!editId && localStudents.find(s => s.admNo === admNo)) {
         showAlert('Kosa la Usajili!', `Mwanafunzi mwenye Adm No (${admNo}) yupo tayari kwenye mfumo!`, 'error');
         return;
@@ -965,10 +965,11 @@
     }
 
     function downloadStudentTemplate() {
-      const csvContent = "data:text/csv;charset=utf-8,AdmNo,FullName,Gender,Class,Year,ParentName,ParentPhone\nMW/2026/001,JOHN YOHANA,M,IV,2026,Yohana Malole,0764437443";
-      const encodedUri = encodeURI(csvContent);
+      const csvContent = "AdmNo,FullName,Gender,Class,Year,ParentName,ParentPhone\nMW/2026/001,JOHN YOHANA,M,IV,2026,Yohana Malole,0764437443";
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
+      link.setAttribute("href", url);
       link.setAttribute("download", "mwashiku_student_template.csv");
       document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
@@ -1009,7 +1010,7 @@
     }
 
     /* ==========================================================
-     * 5. AUTO-PROMOTION SYSTEM (KUPANDISHA MADARASA)
+     * 5. AUTO-PROMOTION SYSTEM
      * ========================================================== */
     function autoPromoteStudents() {
       const progression = { 'AWALI': 'I', 'I': 'II', 'II': 'III', 'III': 'IV', 'IV': 'V', 'V': 'VI', 'VI': 'VII', 'VII': 'GRADUATED' };
@@ -1037,7 +1038,7 @@
     }
 
     /* ==========================================================
-     * 6. MARKS ENTRY WITH NON-REGISTERED STUDENT REJECTION
+     * 6. MARKS ENTRY & CLASS-SPECIFIC TEMPLATES (ALPHABETICAL)
      * ========================================================== */
     function loadStudentsForMarks() {
       const selectedClass = document.getElementById('marksClassFilter').value;
@@ -1058,7 +1059,7 @@
       const subjects = getSubjectsForClass(selectedClass);
       document.getElementById('subjectsInfoLabel').innerText = `Masomo: ${subjects.map(sub => sub.name).join(', ')}`;
 
-      let headHTML = `<tr><th class="p-2 border">Mwanafunzi</th>`;
+      let headHTML = `<tr><th class="p-2 border">Mwanafunzi (A-Z)</th>`;
       subjects.forEach(sub => { headHTML += `<th class="p-2 border text-center">${sub.name}</th>`; });
       headHTML += `</tr>`; thead.innerHTML = headHTML;
 
@@ -1072,6 +1073,32 @@
         rowHTML += `</tr>`; tbody.innerHTML += rowHTML;
       });
       container.classList.remove('hidden');
+    }
+
+    function downloadMarksTemplate() {
+      const selectedClass = document.getElementById('marksClassFilter').value;
+      if (!selectedClass) { 
+        showAlert('Makosa', 'Chagua darasa kwanza kabla ya kudownload template maalum.', 'warning'); 
+        return; 
+      }
+
+      const students = localStudents.filter(s => s.className === selectedClass);
+      if (students.length === 0) { 
+        showAlert('Taarifa', 'Hakuna wanafunzi waliopo kwenye darasa hili hivyo template haiwezi kutengenezwa.', 'info'); 
+        return; 
+      }
+
+      const subjects = getSubjectsForClass(selectedClass);
+      let csvHeader = "StudentID,AdmNo,FullName," + subjects.map(sub => sub.key).join(",") + "\n";
+      let csvRows = students.map(s => `${s.id},${s.admNo},"${s.fullName}",` + subjects.map(() => "0").join(",")).join("\n");
+
+      const csvContent = csvHeader + csvRows;
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Smart_Marks_Template_Darasa_${selectedClass}.csv`);
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
     function uploadMarksCSV(event) {
@@ -1151,7 +1178,7 @@
     }
 
     /* ==========================================================
-     * 7. REPORT & SMS SYSTEM
+     * 7. REPORT & SMS SYSTEM (RANKED & ALPHABETICAL)
      * ========================================================== */
     function calculateGrade(avg, className) {
       const isLowClass = ['AWALI', 'I', 'II'].includes(className);
@@ -1182,18 +1209,21 @@
         return { ...s, marks: m, total, avg, grade: calculateGrade(avg, selectedClass) };
       });
 
-      results.sort((a, b) => b.total - a.total);
+      let sortedByMarks = [...results].sort((a, b) => b.total - a.total);
+      results.sort((a, b) => a.fullName.localeCompare(b.fullName));
 
-      results.forEach((r, idx) => {
+      results.forEach((r) => {
+        const rank = sortedByMarks.findIndex(item => item.id === r.id) + 1;
+
         tbody.innerHTML += `
           <tr class="border-b hover:bg-slate-50">
-            <td class="p-2.5 font-bold">${idx + 1}</td>
+            <td class="p-2.5 font-bold text-center bg-blue-50">${rank}</td>
             <td class="p-2.5 font-semibold">${r.fullName}</td>
             <td class="p-2.5 font-bold">${r.total}</td>
             <td class="p-2.5">${r.avg}</td>
             <td class="p-2.5 font-bold text-blue-900">${r.grade}</td>
             <td class="p-2.5 text-center no-print">
-              <button onclick="viewReportCard('${r.id}', ${idx + 1}, ${results.length})" class="bg-blue-900 hover:bg-blue-800 text-white px-3 py-1 rounded-lg text-[11px] font-bold">Kadi</button>
+              <button onclick="viewReportCard('${r.id}', ${rank}, ${results.length})" class="bg-blue-900 hover:bg-blue-800 text-white px-3 py-1 rounded-lg text-[11px] font-bold">Kadi</button>
             </td>
           </tr>`;
       });
@@ -1242,7 +1272,7 @@
       const doc = new jsPDF();
 
       doc.setFontSize(14); doc.text("SHULE YA MSINGI MWASHIKU - IGUNGA TABORA", 14, 15);
-      doc.setFontSize(10); doc.text(`MATOKEO YA ${examType} - DARASA LA ${selectedClass}`, 14, 22);
+      doc.setFontSize(10); doc.text(`MATOKEO YA ${examType} - DARASA LA ${selectedClass} (A-Z)`, 14, 22);
 
       let tableData = students.map((s, idx) => {
         let m = (localMarks[examType] && localMarks[examType][s.id]) || {}; let tot = 0;
@@ -1274,13 +1304,14 @@
       });
       rankedStudents.sort((a, b) => b.total - a.total);
 
-      rankedStudents.forEach((s, idx) => {
-        const rank = idx + 1;
+      students.forEach((s) => {
+        const studentResult = rankedStudents.find(item => item.id === s.id);
+        const rank = rankedStudents.findIndex(item => item.id === s.id) + 1;
         const totalStudents = rankedStudents.length;
-        const comments = getTeacherComments(s.grade);
+        const comments = getTeacherComments(studentResult.grade);
 
-        let subjectsText = subjects.map(sub => `${sub.name}: ${s.marks[sub.key] || 0}`).join(', ');
-        let smsBody = `Matokeo ya ${s.fullName}: ${subjectsText}. Jumla: ${s.total}, Wastani: ${s.avg}, Daraja: ${s.grade}, Nafasi: ${rank}/${totalStudents}. Mwashiku Primary`;
+        let subjectsText = subjects.map(sub => `${sub.name}: ${studentResult.marks[sub.key] || 0}`).join(', ');
+        let smsBody = `Matokeo ya ${s.fullName}: ${subjectsText}. Jumla: ${studentResult.total}, Wastani: ${studentResult.avg}, Daraja: ${studentResult.grade}, Nafasi: ${rank}/${totalStudents}. Mwashiku Primary`;
 
         list.innerHTML += `
           <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2">
