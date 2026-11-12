@@ -275,7 +275,52 @@
         <button onclick="showSection('dashboardView')" class="text-xs font-bold text-blue-800 flex items-center space-x-1">
           <i class="fa-solid fa-arrow-left"></i> <span>Rudi Dashboard</span>
         </button>
-        <h2 class="text-sm font-bold text-slate-800 uppercase">Usajili wa Wanafunzi</h2>
+        <h2 class="text-sm font-bold text-slate-800 uppercase">Usajili wa Wanafunzi & Utafutaji</h2>
+      </div>
+
+      <!-- SEARCH STUDENT PROFILE BOX -->
+      <section class="bg-gradient-to-r from-blue-900 to-indigo-900 p-4 rounded-2xl text-white shadow-md space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider flex items-center space-x-2">
+          <i class="fa-solid fa-magnifying-glass text-yellow-400"></i>
+          <span>Tafuta Mwanafunzi (Profile & Historia ya Mitihani)</span>
+        </h3>
+        <div class="flex gap-2">
+          <input type="text" id="searchStudentInput" placeholder="Ingiza Jina Kamili au Adm No..." class="w-full px-3 py-2 text-xs rounded-xl text-slate-800 font-semibold focus:outline-none">
+          <button onclick="searchStudentProfile()" class="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs transition">Tafuta</button>
+        </div>
+      </section>
+
+      <!-- STUDENT PROFILE RESULT MODAL/CONTAINER -->
+      <div id="studentProfileContainer" class="hidden bg-white p-5 rounded-2xl border border-blue-200 shadow-md space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="text-sm font-bold text-blue-900 uppercase">Taarifa Kamili za Mwanafunzi</h3>
+          <button onclick="document.getElementById('studentProfileContainer').classList.add('hidden')" class="text-slate-400 hover:text-red-600 text-sm font-bold"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs bg-slate-50 p-4 rounded-xl border">
+          <p><strong>Adm No:</strong> <span id="profAdmNo" class="font-bold text-blue-900"></span></p>
+          <p><strong>Jina Kamili:</strong> <span id="profFullName" class="font-bold"></span></p>
+          <p><strong>Jinsia:</strong> <span id="profGender"></span></p>
+          <p><strong>Darasa:</strong> <span id="profClass" class="font-bold"></span></p>
+          <p><strong>Mwaka:</strong> <span id="profYear"></span></p>
+          <p><strong>Jina la Mzazi:</strong> <span id="profParentName"></span></p>
+          <p><strong>Simu ya Mzazi:</strong> <span id="profParentPhone" class="font-bold text-emerald-700"></span></p>
+        </div>
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-700 uppercase">Historia ya Mitihani Aliyofanya:</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border">
+              <thead class="bg-slate-100">
+                <tr>
+                  <th class="p-2 border">Aina ya Mtihani</th>
+                  <th class="p-2 border">Jumla ya Alama</th>
+                  <th class="p-2 border">Wastani</th>
+                  <th class="p-2 border">Daraja</th>
+                </tr>
+              </thead>
+              <tbody id="profExamsBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- BULK UPLOAD -->
@@ -558,19 +603,32 @@
         <h2 class="text-sm font-bold text-slate-800 uppercase">SMS kwa Wazazi</h2>
       </div>
       <div class="bg-white p-5 rounded-2xl border space-y-4 shadow-sm">
-        <label class="block text-xs font-bold">Chagua Darasa</label>
-        <select id="smsClassFilter" onchange="loadSmsPreview()" class="w-full p-2.5 text-xs border rounded-xl">
-          <option value="">-- Chagua --</option>
-          <option value="AWALI">AWALI</option>
-          <option value="I">DARASA I</option>
-          <option value="II">DARASA II</option>
-          <option value="III">DARASA III</option>
-          <option value="IV">DARASA IV</option>
-          <option value="V">DARASA V</option>
-          <option value="VI">DARASA VI</option>
-          <option value="VII">DARASA VII</option>
-        </select>
-        <div id="smsPreviewBox" class="hidden space-y-3">
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <label class="block font-bold mb-1">Chagua Darasa</label>
+            <select id="smsClassFilter" onchange="loadSmsPreview()" class="w-full p-2.5 border rounded-xl">
+              <option value="">-- Chagua Darasa --</option>
+              <option value="AWALI">AWALI</option>
+              <option value="I">DARASA I</option>
+              <option value="II">DARASA II</option>
+              <option value="III">DARASA III</option>
+              <option value="IV">DARASA IV</option>
+              <option value="V">DARASA V</option>
+              <option value="VI">DARASA VI</option>
+              <option value="VII">DARASA VII</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold mb-1">Aina ya Mtihani</label>
+            <select id="smsExamType" onchange="loadSmsPreview()" class="w-full p-2.5 border rounded-xl font-bold text-blue-900 bg-slate-50">
+              <option value="WEEKLY-TEST">WEEKLY TEST</option>
+              <option value="MID-TERM">MID-TERM</option>
+              <option value="TERMINAL" selected>TERMINAL</option>
+              <option value="ANNUAL">ANNUAL</option>
+            </select>
+          </div>
+        </div>
+        <div id="smsPreviewBox" class="hidden space-y-3 pt-2">
           <h3 class="text-xs font-bold text-slate-700">Orodha ya Ujumbe wa SMS kwa Wazazi:</h3>
           <div id="smsList" class="space-y-3 max-h-80 overflow-y-auto"></div>
         </div>
@@ -867,7 +925,7 @@
     }
 
     /* ==========================================================
-     * 4. STUDENT REGISTRATION & VALIDATION
+     * 4. STUDENT REGISTRATION & SEARCH PROFILE
      * ========================================================== */
     document.getElementById('addStudentForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -899,6 +957,60 @@
         }
       });
     });
+
+    function searchStudentProfile() {
+      const query = document.getElementById('searchStudentInput').value.trim().toUpperCase();
+      if (!query) { showAlert('Taarifa', 'Tafadhali ingiza Jina au Adm No ya mwanafunzi unayemtaka.', 'warning'); return; }
+
+      const student = localStudents.find(s => s.fullName.includes(query) || s.admNo.toUpperCase().includes(query));
+      if (!student) {
+        showAlert('Haionekani', 'Hakuna mwanafunzi aliyepatikana kwa jina au namba hiyo.', 'error');
+        document.getElementById('studentProfileContainer').classList.add('hidden');
+        return;
+      }
+
+      // Jaza taarifa zake binafsi kwenye Card ya Profile
+      document.getElementById('profAdmNo').innerText = student.admNo;
+      document.getElementById('profFullName').innerText = student.fullName;
+      document.getElementById('profGender').innerText = student.gender;
+      document.getElementById('profClass').innerText = student.className;
+      document.getElementById('profYear').innerText = student.year;
+      document.getElementById('profParentName').innerText = student.parentName;
+      document.getElementById('profParentPhone').innerText = student.parentPhone;
+
+      // Tafuta historia ya mitihani yake yote aliyowahi kufanya
+      const exams = ['WEEKLY-TEST', 'MID-TERM', 'TERMINAL', 'ANNUAL'];
+      const subjects = getSubjectsForClass(student.className);
+      const tbody = document.getElementById('profExamsBody');
+      tbody.innerHTML = '';
+
+      let foundExams = 0;
+      exams.forEach(examType => {
+        const m = (localMarks[examType] && localMarks[examType][student.id]);
+        if (m) {
+          foundExams++;
+          let total = 0;
+          subjects.forEach(sub => { total += Number(m[sub.key]) || 0; });
+          const avg = Number((total / subjects.length).toFixed(1));
+          const grade = calculateGrade(avg, student.className);
+
+          tbody.innerHTML += `
+            <tr class="border-b">
+              <td class="p-2 border font-bold text-blue-900">${examType}</td>
+              <td class="p-2 border">${total}</td>
+              <td class="p-2 border">${avg}</td>
+              <td class="p-2 border font-bold">${grade}</td>
+            </tr>`;
+        }
+      });
+
+      if (foundExams === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400">Hakuna alama za mitihani zilizowekwa kwa mwanafunzi huyu bado.</td></tr>`;
+      }
+
+      document.getElementById('studentProfileContainer').classList.remove('hidden');
+      document.getElementById('studentProfileContainer').scrollIntoView();
+    }
 
     function editStudent(id) {
       const s = localStudents.find(item => String(item.id) === String(id));
@@ -1287,6 +1399,7 @@
 
     function loadSmsPreview() {
       const cls = document.getElementById('smsClassFilter').value;
+      const examType = document.getElementById('smsExamType') ? document.getElementById('smsExamType').value : 'TERMINAL';
       const box = document.getElementById('smsPreviewBox');
       const list = document.getElementById('smsList');
       list.innerHTML = '';
@@ -1296,7 +1409,7 @@
       const subjects = getSubjectsForClass(cls);
 
       let rankedStudents = students.map(s => {
-        const m = (localMarks['TERMINAL'] && localMarks['TERMINAL'][s.id]) || {};
+        const m = (localMarks[examType] && localMarks[examType][s.id]) || {};
         let total = 0;
         subjects.forEach(sub => { total += Number(m[sub.key]) || 0; });
         const avg = Number((total / subjects.length).toFixed(1));
@@ -1308,10 +1421,9 @@
         const studentResult = rankedStudents.find(item => item.id === s.id);
         const rank = rankedStudents.findIndex(item => item.id === s.id) + 1;
         const totalStudents = rankedStudents.length;
-        const comments = getTeacherComments(studentResult.grade);
 
         let subjectsText = subjects.map(sub => `${sub.name}: ${studentResult.marks[sub.key] || 0}`).join(', ');
-        let smsBody = `Matokeo ya ${s.fullName}: ${subjectsText}. Jumla: ${studentResult.total}, Wastani: ${studentResult.avg}, Daraja: ${studentResult.grade}, Nafasi: ${rank}/${totalStudents}. Mwashiku Primary`;
+        let smsBody = `Matokeo ya ${s.fullName} (${examType}): ${subjectsText}. Jumla: ${studentResult.total}, Wastani: ${studentResult.avg}, Daraja: ${studentResult.grade}, Nafasi: ${rank}/${totalStudents}. Mwashiku Primary`;
 
         list.innerHTML += `
           <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2">
