@@ -1558,7 +1558,7 @@
     }
 
     /* ==========================================================
-     * 8. SMS SECTION WITH AUTOMATED COMMENTS & BULK SENDING
+     * 8. SMS SECTION WITH INTERACTIVE STEP-BY-STEP QUEUE (FIXED FREEZE)
      * ========================================================== */
     function loadSmsPreview() {
       const cls = document.getElementById('smsClassFilter').value;
@@ -1607,25 +1607,51 @@
 
     function sendAllBulkSms() {
       const items = document.querySelectorAll('.sms-item');
-      if (items.length === 0) { showAlert('Taarifa', 'Hakuna SMS za kutuma kwa sasa.', 'warning'); return; }
+      if (items.length === 0) { showAlert('Taarifa', 'Hakuna SMS za kutuma kwa sasa. Chagua darasa kwanza.', 'warning'); return; }
 
       Swal.fire({
-        title: 'Tuma SMS Zote kwa Pamoja?',
-        text: `Utaratibu huu utafungua ujumbe kwa wazazi wote ${items.length} wa darasa hili mfululizo.`,
+        title: 'Tuma SMS Zote kwa Mtiririko?',
+        text: `Hii itafungua ujumbe kwa wazazi ${items.length} mmoja baada ya mwingine kwa usalama bila kugandisha simu.`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#4f46e5',
-        confirmButtonText: 'Ndiyo, Tuma All'
+        confirmButtonText: 'Anza Kutuma'
       }).then((result) => {
         if (result.isConfirmed) {
-          items.forEach((item, index) => {
-            const phone = item.dataset.phone;
-            const body = item.dataset.body;
-            setTimeout(() => {
-              window.open(`sms:${phone}?body=${body}`, '_blank');
-            }, index * 800);
-          });
-          showToast('Utumaji wa SMS umeanza!');
+          let index = 0;
+          function processNextSms() {
+            if (index < items.length) {
+              const phone = items[index].dataset.phone;
+              const body = decodeURIComponent(items[index].dataset.body);
+              
+              // Open SMS app for current parent
+              window.location.href = `sms:${phone}?body=${encodeURIComponent(body)}`;
+              
+              index++;
+              if (index < items.length) {
+                setTimeout(() => {
+                  Swal.fire({
+                    title: `Imetumwa (${index}/${items.length})`,
+                    text: "Bonyeza 'Inayofuata' kuendelea kwa mzazi anayefuata.",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Inayofuata ➡️',
+                    cancelButtonText: 'Sitisha',
+                    confirmButtonColor: '#4f46e5'
+                  }).then((res) => {
+                    if (res.isConfirmed) {
+                      processNextSms();
+                    }
+                  });
+                }, 500);
+              } else {
+                setTimeout(() => {
+                  showAlert('Imekamilika!', 'Umetuma ujumbe kwa wazazi wote wa darasa hili kikamilifu.', 'success');
+                }, 500);
+              }
+            }
+          }
+          processNextSms();
         }
       });
     }
