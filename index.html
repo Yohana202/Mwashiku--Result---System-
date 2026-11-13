@@ -774,6 +774,16 @@
     let isMaintenanceActive = false;
     let activeUser = null;
 
+    // HELPER FUNCTION: FIX PHONE NUMBER TO ALWAYS START WITH 0
+    function fixPhoneNumber(phone) {
+      if (!phone) return '';
+      let p = String(phone).trim().replace(/\D/g, '');
+      if (p.length === 9 && !p.startsWith('0')) {
+        p = '0' + p;
+      }
+      return p;
+    }
+
     db.ref('mwashiku_students').on('value', (snapshot) => {
       const data = snapshot.val();
       let rawStudents = data ? Object.values(data) : [];
@@ -1038,6 +1048,8 @@
 
       const editId = document.getElementById('editStudentId').value;
       const admNo = document.getElementById('stuAdmNo').value.trim();
+      const rawPhone = document.getElementById('stuParentPhone').value.trim();
+      const parentPhone = fixPhoneNumber(rawPhone);
 
       if (!editId && localStudents.find(s => s.admNo === admNo)) {
         showAlert('Kosa la Usajili!', `Mwanafunzi mwenye Adm No (${admNo}) yupo tayari kwenye mfumo!`, 'error');
@@ -1053,7 +1065,7 @@
         className: document.getElementById('stuClass').value,
         year: document.getElementById('stuYear').value,
         parentName: document.getElementById('stuParentName').value.trim(),
-        parentPhone: document.getElementById('stuParentPhone').value.trim()
+        parentPhone: parentPhone
       };
 
       db.ref('mwashiku_students/' + studentId).set(studentData, (error) => {
@@ -1082,7 +1094,7 @@
       document.getElementById('profClass').innerText = student.className;
       document.getElementById('profYear').innerText = student.year;
       document.getElementById('profParentName').innerText = student.parentName;
-      document.getElementById('profParentPhone').innerText = student.parentPhone;
+      document.getElementById('profParentPhone').innerText = fixPhoneNumber(student.parentPhone);
 
       const exams = ['WEEKLY-TEST', 'MID-TERM', 'TERMINAL', 'ANNUAL'];
       const subjects = getSubjectsForClass(student.className);
@@ -1128,7 +1140,7 @@
       document.getElementById('stuClass').value = s.className;
       document.getElementById('stuYear').value = s.year;
       document.getElementById('stuParentName').value = s.parentName;
-      document.getElementById('stuParentPhone').value = s.parentPhone;
+      document.getElementById('stuParentPhone').value = fixPhoneNumber(s.parentPhone);
 
       document.getElementById('formTitle').innerText = "Hariri Taarifa za Mwanafunzi";
       document.getElementById('saveStudentBtn').innerHTML = `<i class="fa-solid fa-pen-to-square mr-1"></i> UPDATE`;
@@ -1169,12 +1181,13 @@
       const tbody = document.getElementById('studentTableBody');
       tbody.innerHTML = localStudents.length === 0 ? `<tr><td colspan="5" class="text-center p-3 text-slate-400">Hakuna mwanafunzi aliyesajiliwa.</td></tr>` : '';
       localStudents.forEach(s => {
+        const formattedPhone = fixPhoneNumber(s.parentPhone);
         tbody.innerHTML += `
           <tr class="border-b hover:bg-slate-50">
             <td class="p-2.5 font-bold text-blue-900">${s.admNo}</td>
             <td class="p-2.5 font-semibold">${s.fullName}</td>
             <td class="p-2.5">${s.className}</td>
-            <td class="p-2.5">${s.parentPhone}</td>
+            <td class="p-2.5">${formattedPhone}</td>
             <td class="p-2.5 text-center space-x-2">
               <button onclick="editStudent('${s.id}')" class="text-blue-600 hover:text-blue-800" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
               <button onclick="deleteStudent('${s.id}')" class="text-red-600 hover:text-red-800" title="Delete"><i class="fa-solid fa-trash"></i></button>
@@ -1216,7 +1229,7 @@
                 className: cols[3].trim().toUpperCase(),
                 year: cols[4].trim(),
                 parentName: cols[5].trim(),
-                parentPhone: cols[6].trim()
+                parentPhone: fixPhoneNumber(cols[6].trim())
               };
               db.ref('mwashiku_students/' + id).set(studentData);
               count++;
@@ -1387,7 +1400,6 @@
       });
     }
 
-    // FIXED FEATURE 4: CLEAR MARKS FOR THE SPECIFIC CLASS ONLY
     function clearClassMarksForExam() {
       if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
       const selectedClass = document.getElementById('marksClassFilter').value;
@@ -1397,7 +1409,7 @@
 
       Swal.fire({
         title: `Futa Alama za Darasa la ${selectedClass}?`,
-        text: `Alama za wanafunzi wa darasa hili pekee zitaondolewa kwenye mtihani wa (${examType}). Madarasa mengine hayataathirika.`,
+        text: `Alama za wanafunzi wa darasa hili pekee zitaondolewa kwenye mtihani wa (${examType}).`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -1573,18 +1585,19 @@
         const rank = rankedStudents.findIndex(item => item.id === s.id) + 1;
         const totalStudents = rankedStudents.length;
         const comments = getTeacherComments(studentResult.grade);
+        const parentPhone = fixPhoneNumber(s.parentPhone);
 
         let subjectsText = subjects.map(sub => `${sub.name}: ${studentResult.marks[sub.key] || 0}`).join(', ');
         let smsBody = `Matokeo ya ${s.fullName} (${examType}): ${subjectsText}. Jumla: ${studentResult.total}, Wastani: ${studentResult.avg}, Daraja: ${studentResult.grade}, Nafasi: ${rank}/${totalStudents}. Maoni: ${comments.teacher} Mwashiku Primary`;
 
         list.innerHTML += `
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2 sms-item" data-phone="${s.parentPhone}" data-body="${encodeURIComponent(smsBody)}">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2 sms-item" data-phone="${parentPhone}" data-body="${encodeURIComponent(smsBody)}">
             <div class="flex justify-between font-bold text-blue-900 border-b pb-1">
-              <span>Mzazi: ${s.parentName} (${s.parentPhone})</span>
+              <span>Mzazi: ${s.parentName} (${parentPhone})</span>
               <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Nafasi: ${rank}/${totalStudents}</span>
             </div>
             <p class="text-slate-700 leading-relaxed">${smsBody}</p>
-            <a href="sms:${s.parentPhone}?body=${encodeURIComponent(smsBody)}" class="inline-block bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-[11px]">
+            <a href="sms:${parentPhone}?body=${encodeURIComponent(smsBody)}" class="inline-block bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-[11px]">
               <i class="fa-solid fa-paper-plane mr-1"></i> Tuma SMS Mmoja
             </a>
           </div>`;
@@ -1630,7 +1643,6 @@
     function refreshDashboardData() {
       document.getElementById('cardTotalStudents').innerText = localStudents.length;
 
-      // FIXED: Count unique students who actually have at least one exam result recorded
       let studentsWithResults = new Set();
       Object.keys(localMarks).forEach(exam => {
         if (localMarks[exam]) {
@@ -1641,7 +1653,6 @@
       });
       document.getElementById('cardTotalResults').innerText = studentsWithResults.size;
 
-      // FIXED FEATURE: RENDER CLASS PERFORMANCE TABLE ON DASHBOARD
       const classTableBody = document.getElementById('classPerformanceTableBody');
       classTableBody.innerHTML = '';
       const classesList = ['AWALI', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
@@ -1653,7 +1664,6 @@
         let totalScoreSum = 0;
 
         clsStudents.forEach(s => {
-          // Check across active exams to get student's average
           let studentExamsAvg = 0; let countedExams = 0;
           ['WEEKLY-TEST', 'MID-TERM', 'TERMINAL', 'ANNUAL'].forEach(ex => {
             const m = (localMarks[ex] && localMarks[ex][s.id]);
