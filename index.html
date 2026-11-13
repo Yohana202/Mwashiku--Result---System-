@@ -189,21 +189,23 @@
 
     <!-- VIEW 1: DASHBOARD HOME -->
     <main id="dashboardView" class="container mx-auto p-4 space-y-6">
-      <!-- SCHOOL OVERALL PERFORMANCE CARD -->
-      <section class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-5 rounded-3xl shadow-xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-          <h2 class="text-sm font-extrabold uppercase tracking-wider text-yellow-400 mb-1"><i class="fa-solid fa-chart-line mr-1"></i> Ufaulu wa Jumla wa Shule Nzima (Awali - Darasa VII)</h2>
-          <p class="text-xs text-blue-200">Muhtasari wa wastani na ufaulu wa jumla kwa mitihani iliyofanyika.</p>
-        </div>
-        <div class="flex gap-4 bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20 text-center">
-          <div>
-            <p class="text-[10px] uppercase text-blue-300 font-bold">Wastani wa Shule</p>
-            <h3 id="schoolOverallAvg" class="text-xl font-black text-yellow-400">0.0</h3>
-          </div>
-          <div class="border-l border-white/20 pl-4">
-            <p class="text-[10px] uppercase text-blue-300 font-bold">Daraja la Shule</p>
-            <h3 id="schoolOverallGrade" class="text-xl font-black text-emerald-400">-</h3>
-          </div>
+      <!-- CLASS-BY-CLASS PERFORMANCE TABLE CARD -->
+      <section class="bg-white p-5 rounded-3xl shadow-xl border border-slate-200 space-y-3">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-blue-900 border-b pb-2 flex items-center">
+          <i class="fa-solid fa-table-cells mr-2 text-yellow-500"></i> Ufaulu wa Kila Darasa (Wastani na Madaraja)
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border">
+            <thead class="bg-slate-100 text-slate-700">
+              <tr>
+                <th class="p-2.5 border">Darasa</th>
+                <th class="p-2.5 border text-center">Wanafunzi wenye Alama</th>
+                <th class="p-2.5 border text-center">Wastani wa Darasa</th>
+                <th class="p-2.5 border text-center">Daraja la Darasa</th>
+              </tr>
+            </thead>
+            <tbody id="classPerformanceTableBody"></tbody>
+          </table>
         </div>
       </section>
 
@@ -498,16 +500,16 @@
           </div>
         </div>
 
-        <!-- UPLOAD & CLEAR ACTIONS -->
+        <!-- UPLOAD & CLEAR ACTIONS FOR SPECIFIC CLASS -->
         <div class="flex flex-wrap gap-2 justify-between items-center bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs">
-          <span class="text-emerald-900 font-semibold">Pakia alama za CSV au futa alama zote za mtihani huu kama zimekosekana.</span>
+          <span class="text-emerald-900 font-semibold">Pakia alama za CSV au futa alama za <b>darasa hili pekee</b> kama zimekosekana.</span>
           <div class="flex gap-2">
             <label class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-1.5 rounded-xl font-bold cursor-pointer">
               Pakia Alama (CSV)
               <input type="file" id="marksCsvInput" accept=".csv" onchange="uploadMarksCSV(event)" class="hidden">
             </label>
-            <button onclick="clearAllMarksForExam()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl font-bold">
-              <i class="fa-solid fa-trash-can mr-1"></i> Futa Alama Zote
+            <button onclick="clearClassMarksForExam()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl font-bold">
+              <i class="fa-solid fa-trash-can mr-1"></i> Futa Alama za Darasa hili
             </button>
           </div>
         </div>
@@ -772,7 +774,6 @@
     let isMaintenanceActive = false;
     let activeUser = null;
 
-    // Realtime Listeners with Alphabetical Sorting (A-Z)
     db.ref('mwashiku_students').on('value', (snapshot) => {
       const data = snapshot.val();
       let rawStudents = data ? Object.values(data) : [];
@@ -821,7 +822,6 @@
       }
     });
 
-    // SYSTEM LOGGING FUNCTION
     function logActivity(actionMessage) {
       if (!activeUser) return;
       const logId = 'LOG_' + Date.now();
@@ -836,7 +836,7 @@
     function toggleMaintenanceMode() {
       const newState = !isMaintenanceActive;
       db.ref('mwashiku_settings/maintenance').set(newState).then(() => {
-        logActivity(newState ? 'Amewasha Hali ya Matengenezo' : 'Amewasha Hali ya Kawaida (Normal)');
+        logActivity(newState ? 'Amewasha Hali ya Matengenezo' : 'Amewasha Hali ya Kawaida');
         showToast(newState ? 'Hali ya matengenezo imewashwa.' : 'Hali ya matengenezo imezimwa.');
       });
     }
@@ -883,10 +883,6 @@
       } else {
         if (avg >= 41) return 'A'; if (avg >= 31) return 'B'; if (avg >= 21) return 'C'; if (avg >= 11) return 'D'; return 'E';
       }
-    }
-
-    function calculateGradeForSchool(avg) {
-      if (avg >= 41) return 'A'; if (avg >= 31) return 'B'; if (avg >= 21) return 'C'; if (avg >= 11) return 'D'; return 'E';
     }
 
     function getTeacherComments(grade) {
@@ -1038,7 +1034,7 @@
      * ========================================================== */
     document.getElementById('addStudentForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo. Huwezi kusajili mwanafunzi kwa sasa.', 'warning'); return; }
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
 
       const editId = document.getElementById('editStudentId').value;
       const admNo = document.getElementById('stuAdmNo').value.trim();
@@ -1263,7 +1259,7 @@
     }
 
     /* ==========================================================
-     * 6. MARKS ENTRY & BULK CLEARING FEATURE
+     * 6. MARKS ENTRY & CLASS-SPECIFIC CLEARING FEATURE
      * ========================================================== */
     function loadStudentsForMarks() {
       const selectedClass = document.getElementById('marksClassFilter').value;
@@ -1334,7 +1330,7 @@
         let allMarks = { ...localMarks };
         if (!allMarks[examType]) allMarks[examType] = {};
 
-        let acceptedCount = 0; let rejectedCount = 0;
+        let acceptedCount = 0;
 
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
@@ -1352,8 +1348,6 @@
               }
               allMarks[examType][targetId] = stuMarks;
               acceptedCount++;
-            } else {
-              rejectedCount++;
             }
           }
         }
@@ -1393,24 +1387,35 @@
       });
     }
 
-    // FEATURE 4: CLEAR ALL MARKS FOR EXAM IF ENTERED BY MISTAKE
-    function clearAllMarksForExam() {
+    // FIXED FEATURE 4: CLEAR MARKS FOR THE SPECIFIC CLASS ONLY
+    function clearClassMarksForExam() {
       if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
+      const selectedClass = document.getElementById('marksClassFilter').value;
       const examType = document.getElementById('marksExamType').value;
+
+      if (!selectedClass) { showAlert('Taarifa', 'Chagua darasa kwanza kabla ya kufuta alama.', 'warning'); return; }
+
       Swal.fire({
-        title: 'Futa Alama Zote?',
-        text: `Una uhakika unataka kufuta matokeo yote ya mtihani wa (${examType}) kwa sababu yamekosewa?`,
+        title: `Futa Alama za Darasa la ${selectedClass}?`,
+        text: `Alama za wanafunzi wa darasa hili pekee zitaondolewa kwenye mtihani wa (${examType}). Madarasa mengine hayataathirika.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        confirmButtonText: 'Ndiyo, Futa Zote'
+        confirmButtonText: 'Ndiyo, Futa'
       }).then((result) => {
         if (result.isConfirmed) {
-          db.ref(`mwashiku_marks/${examType}`).remove().then(() => {
-            logActivity(`Amefuta matokeo yote ya mtihani wa (${examType})`);
-            showAlert('Imefutwa', 'Matokeo yote ya mtihani huu yamefutwa kikamilifu.', 'success');
-            loadStudentsForMarks();
-          });
+          const classStudents = localStudents.filter(s => s.className === selectedClass);
+          let allMarks = { ...localMarks };
+          if (allMarks[examType]) {
+            classStudents.forEach(s => {
+              delete allMarks[examType][s.id];
+            });
+            db.ref(`mwashiku_marks/${examType}`).set(allMarks[examType]).then(() => {
+              logActivity(`Amefuta matokeo ya Darasa la ${selectedClass} kwa mtihani wa (${examType})`);
+              showAlert('Imefutwa', `Alama za Darasa la ${selectedClass} zimefutwa kikamilifu.`, 'success');
+              loadStudentsForMarks();
+            });
+          }
         }
       });
     }
@@ -1456,7 +1461,6 @@
           </tr>`;
       });
 
-      // FEATURE 2: BEST TEN & BOTTOM TEN
       const bestTenList = document.getElementById('bestTenList');
       const bottomTenList = document.getElementById('bottomTenList');
       bestTenList.innerHTML = ''; bottomTenList.innerHTML = '';
@@ -1474,14 +1478,13 @@
       });
       if(bottom10.length === 0) bottomTenList.innerHTML = `<p class="text-slate-400">Hakuna kumbukumbu bado.</p>`;
 
-      // FEATURE 3: TREND ANALYSIS (MAENDELEO YA MASOMO)
       let classAvgSum = 0;
       sortedByMarks.forEach(item => classAvgSum += item.avg);
       let classOverallAvg = sortedByMarks.length > 0 ? (classAvgSum / sortedByMarks.length).toFixed(1) : 0;
 
       const trendCard = document.getElementById('trendAnalysisCard');
       const trendText = document.getElementById('trendAnalysisText');
-      trendText.innerHTML = `Wastani wa darasa kwa mtihani wa <b>${examType}</b> ni <b>${classOverallAvg}</b>. Ufaulu wa darasa hili unaonyesha mabadiliko chanya kulinganisha na viwango vya kitaifa vya ufaulu.`;
+      trendText.innerHTML = `Wastani wa darasa hili ni <b>${classOverallAvg}</b>. Ufaulu unaendelea vizuri.`;
       trendCard.classList.remove('hidden');
 
       container.classList.remove('hidden');
@@ -1589,14 +1592,13 @@
       box.classList.remove('hidden');
     }
 
-    // FEATURE 1: SEND ALL BULK SMS AT ONCE
     function sendAllBulkSms() {
       const items = document.querySelectorAll('.sms-item');
-      if (items.length === 0) { showAlert('Taarifa', 'Hakuna SMS za kutuma kwa sasa. Chagua darasa kwanza.', 'warning'); return; }
+      if (items.length === 0) { showAlert('Taarifa', 'Hakuna SMS za kutuma kwa sasa.', 'warning'); return; }
 
       Swal.fire({
         title: 'Tuma SMS Zote kwa Pamoja?',
-        text: `Utaratibu huu utafungua programu ya ujumbe mfululizo kwa wazazi wote ${items.length} wa darasa hili.`,
+        text: `Utaratibu huu utafungua ujumbe kwa wazazi wote ${items.length} wa darasa hili mfululizo.`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#4f46e5',
@@ -1610,13 +1612,13 @@
               window.open(`sms:${phone}?body=${body}`, '_blank');
             }, index * 800);
           });
-          showToast('Uendeshaji wa utumaji SMS umeanza!');
+          showToast('Utumaji wa SMS umeanza!');
         }
       });
     }
 
     /* ==========================================================
-     * 9. SCHOOL-WIDE OVERALL PERFORMANCE CALCULATION
+     * 9. DASHBOARD REFRESH & CLASS PERFORMANCE TABLE
      * ========================================================== */
     function initAppSession(user) {
       document.getElementById('authSection').classList.add('hidden');
@@ -1627,36 +1629,59 @@
 
     function refreshDashboardData() {
       document.getElementById('cardTotalStudents').innerText = localStudents.length;
-      let totalResultsCount = 0;
+
+      // FIXED: Count unique students who actually have at least one exam result recorded
+      let studentsWithResults = new Set();
       Object.keys(localMarks).forEach(exam => {
-        totalResultsCount += Object.keys(localMarks[exam] || {}).length;
+        if (localMarks[exam]) {
+          Object.keys(localMarks[exam]).forEach(stuId => {
+            studentsWithResults.add(stuId);
+          });
+        }
       });
-      document.getElementById('cardTotalResults').innerText = totalResultsCount;
+      document.getElementById('cardTotalResults').innerText = studentsWithResults.size;
 
-      // FEATURE 6: SCHOOL-WIDE OVERALL PERFORMANCE (AWALI - VII)
-      let allAvgsSum = 0;
-      let totalStudentsCount = 0;
+      // FIXED FEATURE: RENDER CLASS PERFORMANCE TABLE ON DASHBOARD
+      const classTableBody = document.getElementById('classPerformanceTableBody');
+      classTableBody.innerHTML = '';
+      const classesList = ['AWALI', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 
-      const allExams = ['WEEKLY-TEST', 'MID-TERM', 'TERMINAL', 'ANNUAL'];
-      localStudents.forEach(s => {
-        const subjects = getSubjectsForClass(s.className);
-        allExams.forEach(exam => {
-          const m = (localMarks[exam] && localMarks[exam][s.id]);
-          if (m) {
-            let total = 0;
-            subjects.forEach(sub => { total += Number(m[sub.key]) || 0; });
-            let avg = total / subjects.length;
-            allAvgsSum += avg;
-            totalStudentsCount++;
+      classesList.forEach(cls => {
+        const clsStudents = localStudents.filter(s => s.className === cls);
+        const subjects = getSubjectsForClass(cls);
+        let scoredCount = 0;
+        let totalScoreSum = 0;
+
+        clsStudents.forEach(s => {
+          // Check across active exams to get student's average
+          let studentExamsAvg = 0; let countedExams = 0;
+          ['WEEKLY-TEST', 'MID-TERM', 'TERMINAL', 'ANNUAL'].forEach(ex => {
+            const m = (localMarks[ex] && localMarks[ex][s.id]);
+            if (m) {
+              let subTot = 0;
+              subjects.forEach(sub => { subTot += Number(m[sub.key]) || 0; });
+              studentExamsAvg += (subTot / subjects.length);
+              countedExams++;
+            }
+          });
+
+          if (countedExams > 0) {
+            totalScoreSum += (studentExamsAvg / countedExams);
+            scoredCount++;
           }
         });
+
+        let clsAvg = scoredCount > 0 ? (totalScoreSum / scoredCount).toFixed(1) : 0.0;
+        let clsGrade = scoredCount > 0 ? calculateGrade(clsAvg, cls) : '-';
+
+        classTableBody.innerHTML += `
+          <tr class="border-b">
+            <td class="p-2.5 font-bold text-blue-900">Darasa la ${cls}</td>
+            <td class="p-2.5 text-center">${scoredCount} / ${clsStudents.length}</td>
+            <td class="p-2.5 text-center font-bold">${clsAvg}</td>
+            <td class="p-2.5 text-center font-extrabold text-emerald-700">${clsGrade}</td>
+          </tr>`;
       });
-
-      let schoolAvg = totalStudentsCount > 0 ? (allAvgsSum / totalStudentsCount).toFixed(1) : 0.0;
-      let schoolGrade = calculateGradeForSchool(schoolAvg);
-
-      document.getElementById('schoolOverallAvg').innerText = schoolAvg;
-      document.getElementById('schoolOverallGrade').innerText = schoolGrade;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
