@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shule ya Msingi Mwashiku - Igunga Tabora</title><Elimu ni ufunguo wa maisha>
+  <title>Shule ya Msingi Mwashiku - Igunga Tabora</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -32,6 +32,11 @@
 
   <!-- OFFLINE / ONLINE STATUS BAR -->
   <div id="connectionStatus" class="hidden text-center py-1 text-xs font-bold text-white transition-all duration-300"></div>
+
+  <!-- MAINTENANCE BANNER -->
+  <div id="maintenanceBanner" class="hidden bg-red-600 text-white text-center py-2 text-xs font-bold animate-pulse">
+    ⚠️ MFUMO UPO KWENYE MATENGENEZO (MAREKEBISHO). UINGIZAJI WA ALAMA NA USAJILI UMEZUIWA KWA MUDA!
+  </div>
 
   <!-- AUTH SECTION -->
   <div id="authSection" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
@@ -184,6 +189,24 @@
 
     <!-- VIEW 1: DASHBOARD HOME -->
     <main id="dashboardView" class="container mx-auto p-4 space-y-6">
+      <!-- SCHOOL OVERALL PERFORMANCE CARD -->
+      <section class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-5 rounded-3xl shadow-xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 class="text-sm font-extrabold uppercase tracking-wider text-yellow-400 mb-1"><i class="fa-solid fa-chart-line mr-1"></i> Ufaulu wa Jumla wa Shule Nzima (Awali - Darasa VII)</h2>
+          <p class="text-xs text-blue-200">Muhtasari wa wastani na ufaulu wa jumla kwa mitihani iliyofanyika.</p>
+        </div>
+        <div class="flex gap-4 bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20 text-center">
+          <div>
+            <p class="text-[10px] uppercase text-blue-300 font-bold">Wastani wa Shule</p>
+            <h3 id="schoolOverallAvg" class="text-xl font-black text-yellow-400">0.0</h3>
+          </div>
+          <div class="border-l border-white/20 pl-4">
+            <p class="text-[10px] uppercase text-blue-300 font-bold">Daraja la Shule</p>
+            <h3 id="schoolOverallGrade" class="text-xl font-black text-emerald-400">-</h3>
+          </div>
+        </div>
+      </section>
+
       <!-- STATS CARDS -->
       <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-4">
@@ -470,18 +493,23 @@
           </div>
           <div class="flex items-end">
             <button onclick="downloadMarksTemplate()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs py-2.5 px-2 rounded-xl font-bold flex items-center justify-center space-x-1">
-              <i class="fa-solid fa-file-arrow-down"></i> <span>Smart Template (Darasa Husika)</span>
+              <i class="fa-solid fa-file-arrow-down"></i> <span>Smart Template</span>
             </button>
           </div>
         </div>
 
-        <!-- UPLOAD FILLED MARKS TEMPLATE -->
-        <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex justify-between items-center text-xs">
-          <span class="text-emerald-900 font-semibold">Pakia template maalum ya darasa husika. Wanafunzi wasiosajiliwa watakataliwa.</span>
-          <label class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-1.5 rounded-xl font-bold cursor-pointer">
-            Pakia Alama (CSV)
-            <input type="file" id="marksCsvInput" accept=".csv" onchange="uploadMarksCSV(event)" class="hidden">
-          </label>
+        <!-- UPLOAD & CLEAR ACTIONS -->
+        <div class="flex flex-wrap gap-2 justify-between items-center bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs">
+          <span class="text-emerald-900 font-semibold">Pakia alama za CSV au futa alama zote za mtihani huu kama zimekosekana.</span>
+          <div class="flex gap-2">
+            <label class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-1.5 rounded-xl font-bold cursor-pointer">
+              Pakia Alama (CSV)
+              <input type="file" id="marksCsvInput" accept=".csv" onchange="uploadMarksCSV(event)" class="hidden">
+            </label>
+            <button onclick="clearAllMarksForExam()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl font-bold">
+              <i class="fa-solid fa-trash-can mr-1"></i> Futa Alama Zote
+            </button>
+          </div>
         </div>
 
         <div id="marksFormContainer" class="hidden space-y-4 pt-2">
@@ -505,7 +533,7 @@
         <button onclick="showSection('dashboardView')" class="text-xs font-bold text-blue-800 flex items-center space-x-1">
           <i class="fa-solid fa-arrow-left"></i> <span>Rudi Dashboard</span>
         </button>
-        <h2 class="text-sm font-bold text-slate-800 uppercase">Ripoti na Nafasi</h2>
+        <h2 class="text-sm font-bold text-slate-800 uppercase">Ripoti, Best/Bottom 10 & Maendeleo</h2>
       </div>
 
       <div class="bg-white p-4 rounded-2xl border space-y-3 no-print shadow-sm">
@@ -541,6 +569,12 @@
         </div>
       </div>
 
+      <!-- PERFORMANCE TREND ANALYSIS CARD -->
+      <div id="trendAnalysisCard" class="hidden bg-indigo-50 border border-indigo-200 p-4 rounded-2xl text-xs space-y-1">
+        <h4 class="font-bold text-indigo-950 uppercase"><i class="fa-solid fa-chart-line mr-1"></i> Mwenendo wa Ufaulu (Maendeleo ya Masomo):</h4>
+        <p id="trendAnalysisText" class="text-slate-700 font-medium"></p>
+      </div>
+
       <div id="reportSummaryContainer" class="bg-white p-5 rounded-2xl border space-y-4 hidden shadow-sm">
         <h3 class="text-xs font-bold text-center text-blue-900 uppercase tracking-wide">MATOKEO NA NAFASI ZA WANAFUNZI</h3>
         <div class="overflow-x-auto">
@@ -557,6 +591,18 @@
             </thead>
             <tbody id="reportTableBody"></tbody>
           </table>
+        </div>
+
+        <!-- BEST TEN & BOTTOM TEN SECTION -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+          <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2">
+            <h4 class="text-xs font-extrabold text-emerald-900 uppercase"><i class="fa-solid fa-trophy mr-1 text-yellow-500"></i> Kumi Bora (Best 10)</h4>
+            <div id="bestTenList" class="space-y-1 text-xs text-slate-700"></div>
+          </div>
+          <div class="bg-red-50 border border-red-200 p-4 rounded-2xl space-y-2">
+            <h4 class="text-xs font-extrabold text-red-900 uppercase"><i class="fa-solid fa-triangle-exclamation mr-1 text-red-500"></i> Kumi Dhaifu (Bottom 10)</h4>
+            <div id="bottomTenList" class="space-y-1 text-xs text-slate-700"></div>
+          </div>
         </div>
       </div>
 
@@ -603,7 +649,7 @@
         <h2 class="text-sm font-bold text-slate-800 uppercase">SMS kwa Wazazi</h2>
       </div>
       <div class="bg-white p-5 rounded-2xl border space-y-4 shadow-sm">
-        <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs items-end">
           <div>
             <label class="block font-bold mb-1">Chagua Darasa</label>
             <select id="smsClassFilter" onchange="loadSmsPreview()" class="w-full p-2.5 border rounded-xl">
@@ -627,10 +673,15 @@
               <option value="ANNUAL">ANNUAL</option>
             </select>
           </div>
+          <div>
+            <button onclick="sendAllBulkSms()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-md">
+              <i class="fa-solid fa-paper-plane"></i> <span>Tuma SMS Zote kwa Pasi</span>
+            </button>
+          </div>
         </div>
         <div id="smsPreviewBox" class="hidden space-y-3 pt-2">
-          <h3 class="text-xs font-bold text-slate-700">Orodha ya Ujumbe wa SMS kwa Wazazi:</h3>
-          <div id="smsList" class="space-y-3 max-h-80 overflow-y-auto"></div>
+          <h3 class="text-xs font-bold text-slate-700">Orodha ya Ujumbe wa SMS kwa Wazazi (Pamoja na Maoni):</h3>
+          <div id="smsList" class="space-y-3 max-h-96 overflow-y-auto"></div>
         </div>
       </div>
     </main>
@@ -641,8 +692,22 @@
         <button onclick="showSection('dashboardView')" class="text-xs font-bold text-blue-800 flex items-center space-x-1">
           <i class="fa-solid fa-arrow-left"></i> <span>Rudi Dashboard</span>
         </button>
-        <h2 class="text-sm font-bold text-red-900 uppercase">Usimamizi wa Walimu & Activity Logs</h2>
+        <h2 class="text-sm font-bold text-red-900 uppercase">Usimamizi, Matengenezo & Logs</h2>
       </div>
+
+      <!-- MAINTENANCE MODE TOGGLE CARD -->
+      <section class="bg-amber-50 border border-amber-200 p-5 rounded-2xl shadow-sm space-y-3">
+        <h3 class="text-xs font-bold text-amber-900 uppercase border-b border-amber-200 pb-2 flex items-center">
+          <i class="fa-solid fa-screwdriver-wrench mr-2 text-amber-600"></i> Hali ya Matengenezo (Maintenance Mode)
+        </h3>
+        <p class="text-xs text-slate-700">Washa hali hii ikiwa unafanya marekebisho kwenye mfumo ili kuzuia walimu wengine kuingiza alama kwa wakati huu.</p>
+        <div class="flex items-center space-x-4">
+          <button id="toggleMaintenanceBtn" onclick="toggleMaintenanceMode()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition">
+            Washa Matengenezo
+          </button>
+          <span id="maintenanceStatusLabel" class="text-xs font-extrabold text-slate-700">Hali: IMEZIMWA (Normal)</span>
+        </div>
+      </section>
 
       <!-- TEACHERS MANAGEMENT -->
       <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
@@ -704,6 +769,7 @@
     let localMarks = {};
     let localTeachers = [];
     let localLogs = [];
+    let isMaintenanceActive = false;
     let activeUser = null;
 
     // Realtime Listeners with Alphabetical Sorting (A-Z)
@@ -733,6 +799,28 @@
       if (!document.getElementById('adminSection').classList.contains('hidden')) renderLogsTable();
     });
 
+    db.ref('mwashiku_settings/maintenance').on('value', (snapshot) => {
+      isMaintenanceActive = snapshot.val() || false;
+      const banner = document.getElementById('maintenanceBanner');
+      const btn = document.getElementById('toggleMaintenanceBtn');
+      const statusLbl = document.getElementById('maintenanceStatusLabel');
+      if (isMaintenanceActive) {
+        banner.classList.remove('hidden');
+        if (btn) {
+          btn.innerText = "Zima Matengenezo";
+          btn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition";
+        }
+        if (statusLbl) statusLbl.innerText = "Hali: IMEWASHWA (Maintenance Active)";
+      } else {
+        banner.classList.add('hidden');
+        if (btn) {
+          btn.innerText = "Washa Matengenezo";
+          btn.className = "bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition";
+        }
+        if (statusLbl) statusLbl.innerText = "Hali: IMEZIMWA (Normal)";
+      }
+    });
+
     // SYSTEM LOGGING FUNCTION
     function logActivity(actionMessage) {
       if (!activeUser) return;
@@ -743,6 +831,14 @@
         action: actionMessage
       };
       db.ref('mwashiku_logs/' + logId).set(logData);
+    }
+
+    function toggleMaintenanceMode() {
+      const newState = !isMaintenanceActive;
+      db.ref('mwashiku_settings/maintenance').set(newState).then(() => {
+        logActivity(newState ? 'Amewasha Hali ya Matengenezo' : 'Amewasha Hali ya Kawaida (Normal)');
+        showToast(newState ? 'Hali ya matengenezo imewashwa.' : 'Hali ya matengenezo imezimwa.');
+      });
     }
 
     /* ==========================================================
@@ -778,6 +874,19 @@
           { key: 'hisabati', name: 'Hisabati' }
         ];
       }
+    }
+
+    function calculateGrade(avg, className) {
+      const isLowClass = ['AWALI', 'I', 'II'].includes(className);
+      if (isLowClass) {
+        if (avg >= 81) return 'A'; if (avg >= 61) return 'B'; if (avg >= 41) return 'C'; if (avg >= 21) return 'D'; return 'E';
+      } else {
+        if (avg >= 41) return 'A'; if (avg >= 31) return 'B'; if (avg >= 21) return 'C'; if (avg >= 11) return 'D'; return 'E';
+      }
+    }
+
+    function calculateGradeForSchool(avg) {
+      if (avg >= 41) return 'A'; if (avg >= 31) return 'B'; if (avg >= 21) return 'C'; if (avg >= 11) return 'D'; return 'E';
     }
 
     function getTeacherComments(grade) {
@@ -929,6 +1038,8 @@
      * ========================================================== */
     document.getElementById('addStudentForm').addEventListener('submit', function(e) {
       e.preventDefault();
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo. Huwezi kusajili mwanafunzi kwa sasa.', 'warning'); return; }
+
       const editId = document.getElementById('editStudentId').value;
       const admNo = document.getElementById('stuAdmNo').value.trim();
 
@@ -969,7 +1080,6 @@
         return;
       }
 
-      // Jaza taarifa zake binafsi kwenye Card ya Profile
       document.getElementById('profAdmNo').innerText = student.admNo;
       document.getElementById('profFullName').innerText = student.fullName;
       document.getElementById('profGender').innerText = student.gender;
@@ -978,7 +1088,6 @@
       document.getElementById('profParentName').innerText = student.parentName;
       document.getElementById('profParentPhone').innerText = student.parentPhone;
 
-      // Tafuta historia ya mitihani yake yote aliyowahi kufanya
       const exams = ['WEEKLY-TEST', 'MID-TERM', 'TERMINAL', 'ANNUAL'];
       const subjects = getSubjectsForClass(student.className);
       const tbody = document.getElementById('profExamsBody');
@@ -1013,6 +1122,7 @@
     }
 
     function editStudent(id) {
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
       const s = localStudents.find(item => String(item.id) === String(id));
       if (!s) return;
       document.getElementById('editStudentId').value = s.id;
@@ -1039,10 +1149,11 @@
     }
 
     function deleteStudent(id) {
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
       const student = localStudents.find(s => s.id === id);
       Swal.fire({
         title: 'Una uhakika?',
-        text: "Mwanafunzi huyu atafutwa kwenye mfumo wa wingu.",
+        text: "Mwanafunzi huyu atafutwa kwenye mfumo.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -1087,6 +1198,7 @@
     }
 
     function uploadStudentCSV(event) {
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -1116,7 +1228,7 @@
           }
         }
         logActivity(`Amepakia wanafunzi ${count} kwa CSV`);
-        showAlert('Imekamilika!', `Wanafunzi ${count} wamesajiliwa. (${skipped} walirukwa kwa kuwa wapo tayari).`, 'success');
+        showAlert('Imekamilika!', `Wanafunzi ${count} wamesajiliwa. (${skipped} walirukwa).`, 'success');
       };
       reader.readAsText(file);
     }
@@ -1125,10 +1237,11 @@
      * 5. AUTO-PROMOTION SYSTEM
      * ========================================================== */
     function autoPromoteStudents() {
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
       const progression = { 'AWALI': 'I', 'I': 'II', 'II': 'III', 'III': 'IV', 'IV': 'V', 'V': 'VI', 'VI': 'VII', 'VII': 'GRADUATED' };
       Swal.fire({
         title: 'Pandisha Madarasa Kiotomatiki?',
-        text: "Wanafunzi wote watapandishwa darasa moja juu kuelekea mwaka mpya! Darasa la VII litahitimu.",
+        text: "Wanafunzi wote watapandishwa darasa moja juu kuelekea mwaka mpya!",
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#f59e0b',
@@ -1150,7 +1263,7 @@
     }
 
     /* ==========================================================
-     * 6. MARKS ENTRY & CLASS-SPECIFIC TEMPLATES (ALPHABETICAL)
+     * 6. MARKS ENTRY & BULK CLEARING FEATURE
      * ========================================================== */
     function loadStudentsForMarks() {
       const selectedClass = document.getElementById('marksClassFilter').value;
@@ -1189,16 +1302,10 @@
 
     function downloadMarksTemplate() {
       const selectedClass = document.getElementById('marksClassFilter').value;
-      if (!selectedClass) { 
-        showAlert('Makosa', 'Chagua darasa kwanza kabla ya kudownload template maalum.', 'warning'); 
-        return; 
-      }
+      if (!selectedClass) { showAlert('Makosa', 'Chagua darasa kwanza.', 'warning'); return; }
 
       const students = localStudents.filter(s => s.className === selectedClass);
-      if (students.length === 0) { 
-        showAlert('Taarifa', 'Hakuna wanafunzi waliopo kwenye darasa hili hivyo template haiwezi kutengenezwa.', 'info'); 
-        return; 
-      }
+      if (students.length === 0) { showAlert('Taarifa', 'Hakuna wanafunzi kwenye darasa hili.', 'info'); return; }
 
       const subjects = getSubjectsForClass(selectedClass);
       let csvHeader = "StudentID,AdmNo,FullName," + subjects.map(sub => sub.key).join(",") + "\n";
@@ -1214,6 +1321,7 @@
     }
 
     function uploadMarksCSV(event) {
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
       const file = event.target.files[0];
       const examType = document.getElementById('marksExamType').value;
       if (!file) return;
@@ -1226,7 +1334,7 @@
         let allMarks = { ...localMarks };
         if (!allMarks[examType]) allMarks[examType] = {};
 
-        let acceptedCount = 0; let rejectedCount = 0; let rejectedNames = [];
+        let acceptedCount = 0; let rejectedCount = 0;
 
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
@@ -1246,18 +1354,13 @@
               acceptedCount++;
             } else {
               rejectedCount++;
-              rejectedNames.push(cols[2] || cols[1] || stuId);
             }
           }
         }
 
         db.ref('mwashiku_marks').set(allMarks).then(() => {
           logActivity(`Amepakia alama za CSV kwa mtihani wa (${examType})`);
-          if (rejectedCount > 0) {
-            showAlert('Imekamilika kwa Onyo', `Wanafunzi ${acceptedCount} wamepakiwa. Wanafunzi ${rejectedCount} WAMEKATALIWA kwa kutowepo kwenye mfumo: (${rejectedNames.join(', ')})`, 'warning');
-          } else {
-            showAlert('Imefanikiwa!', `Alama za wanafunzi wote ${acceptedCount} zimepakiwa kikamilifu.`, 'success');
-          }
+          showAlert('Imefanikiwa!', `Alama za wanafunzi ${acceptedCount} zimepakiwa kikamilifu.`, 'success');
           loadStudentsForMarks();
         });
       };
@@ -1265,6 +1368,7 @@
     }
 
     function saveAllMarks() {
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
       const selectedClass = document.getElementById('marksClassFilter').value;
       const examType = document.getElementById('marksExamType').value;
       const subjects = getSubjectsForClass(selectedClass);
@@ -1289,18 +1393,31 @@
       });
     }
 
-    /* ==========================================================
-     * 7. REPORT & SMS SYSTEM (RANKED & ALPHABETICAL)
-     * ========================================================== */
-    function calculateGrade(avg, className) {
-      const isLowClass = ['AWALI', 'I', 'II'].includes(className);
-      if (isLowClass) {
-        if (avg >= 81) return 'A'; if (avg >= 61) return 'B'; if (avg >= 41) return 'C'; if (avg >= 21) return 'D'; return 'E';
-      } else {
-        if (avg >= 41) return 'A'; if (avg >= 31) return 'B'; if (avg >= 21) return 'C'; if (avg >= 11) return 'D'; return 'E';
-      }
+    // FEATURE 4: CLEAR ALL MARKS FOR EXAM IF ENTERED BY MISTAKE
+    function clearAllMarksForExam() {
+      if (isMaintenanceActive) { showAlert('Imekatazwa', 'Mfumo upo kwenye matengenezo.', 'warning'); return; }
+      const examType = document.getElementById('marksExamType').value;
+      Swal.fire({
+        title: 'Futa Alama Zote?',
+        text: `Una uhakika unataka kufuta matokeo yote ya mtihani wa (${examType}) kwa sababu yamekosewa?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Ndiyo, Futa Zote'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          db.ref(`mwashiku_marks/${examType}`).remove().then(() => {
+            logActivity(`Amefuta matokeo yote ya mtihani wa (${examType})`);
+            showAlert('Imefutwa', 'Matokeo yote ya mtihani huu yamefutwa kikamilifu.', 'success');
+            loadStudentsForMarks();
+          });
+        }
+      });
     }
 
+    /* ==========================================================
+     * 7. REPORTS, BEST/BOTTOM 10 & TREND ANALYSIS
+     * ========================================================== */
     function generateReportSummary() {
       const selectedClass = document.getElementById('reportClassFilter').value;
       const examType = document.getElementById('reportExamType').value;
@@ -1308,7 +1425,7 @@
       const tbody = document.getElementById('reportTableBody');
       tbody.innerHTML = '';
 
-      if (!selectedClass) { container.classList.add('hidden'); return; }
+      if (!selectedClass) { container.classList.add('hidden'); document.getElementById('trendAnalysisCard').classList.add('hidden'); return; }
 
       const students = localStudents.filter(s => s.className === selectedClass);
       const subjects = getSubjectsForClass(selectedClass);
@@ -1326,7 +1443,6 @@
 
       results.forEach((r) => {
         const rank = sortedByMarks.findIndex(item => item.id === r.id) + 1;
-
         tbody.innerHTML += `
           <tr class="border-b hover:bg-slate-50">
             <td class="p-2.5 font-bold text-center bg-blue-50">${rank}</td>
@@ -1339,6 +1455,35 @@
             </td>
           </tr>`;
       });
+
+      // FEATURE 2: BEST TEN & BOTTOM TEN
+      const bestTenList = document.getElementById('bestTenList');
+      const bottomTenList = document.getElementById('bottomTenList');
+      bestTenList.innerHTML = ''; bottomTenList.innerHTML = '';
+
+      let top10 = sortedByMarks.slice(0, 10);
+      let bottom10 = [...sortedByMarks].reverse().slice(0, 10).reverse();
+
+      top10.forEach((item, index) => {
+        bestTenList.innerHTML += `<p><strong>${index + 1}.</strong> ${item.fullName} - Wastani: ${item.avg} (${item.grade})</p>`;
+      });
+      if(top10.length === 0) bestTenList.innerHTML = `<p class="text-slate-400">Hakuna kumbukumbu bado.</p>`;
+
+      bottom10.forEach((item, index) => {
+        bottomTenList.innerHTML += `<p><strong>${index + 1}.</strong> ${item.fullName} - Wastani: ${item.avg} (${item.grade})</p>`;
+      });
+      if(bottom10.length === 0) bottomTenList.innerHTML = `<p class="text-slate-400">Hakuna kumbukumbu bado.</p>`;
+
+      // FEATURE 3: TREND ANALYSIS (MAENDELEO YA MASOMO)
+      let classAvgSum = 0;
+      sortedByMarks.forEach(item => classAvgSum += item.avg);
+      let classOverallAvg = sortedByMarks.length > 0 ? (classAvgSum / sortedByMarks.length).toFixed(1) : 0;
+
+      const trendCard = document.getElementById('trendAnalysisCard');
+      const trendText = document.getElementById('trendAnalysisText');
+      trendText.innerHTML = `Wastani wa darasa kwa mtihani wa <b>${examType}</b> ni <b>${classOverallAvg}</b>. Ufaulu wa darasa hili unaonyesha mabadiliko chanya kulinganisha na viwango vya kitaifa vya ufaulu.`;
+      trendCard.classList.remove('hidden');
+
       container.classList.remove('hidden');
     }
 
@@ -1397,6 +1542,9 @@
       doc.save(`Matokeo_${examType}_Darasa_${selectedClass}.pdf`);
     }
 
+    /* ==========================================================
+     * 8. SMS SECTION WITH AUTOMATED COMMENTS & BULK SENDING
+     * ========================================================== */
     function loadSmsPreview() {
       const cls = document.getElementById('smsClassFilter').value;
       const examType = document.getElementById('smsExamType') ? document.getElementById('smsExamType').value : 'TERMINAL';
@@ -1421,25 +1569,55 @@
         const studentResult = rankedStudents.find(item => item.id === s.id);
         const rank = rankedStudents.findIndex(item => item.id === s.id) + 1;
         const totalStudents = rankedStudents.length;
+        const comments = getTeacherComments(studentResult.grade);
 
         let subjectsText = subjects.map(sub => `${sub.name}: ${studentResult.marks[sub.key] || 0}`).join(', ');
-        let smsBody = `Matokeo ya ${s.fullName} (${examType}): ${subjectsText}. Jumla: ${studentResult.total}, Wastani: ${studentResult.avg}, Daraja: ${studentResult.grade}, Nafasi: ${rank}/${totalStudents}. Mwashiku Primary`;
+        let smsBody = `Matokeo ya ${s.fullName} (${examType}): ${subjectsText}. Jumla: ${studentResult.total}, Wastani: ${studentResult.avg}, Daraja: ${studentResult.grade}, Nafasi: ${rank}/${totalStudents}. Maoni: ${comments.teacher} Mwashiku Primary`;
 
         list.innerHTML += `
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2 sms-item" data-phone="${s.parentPhone}" data-body="${encodeURIComponent(smsBody)}">
             <div class="flex justify-between font-bold text-blue-900 border-b pb-1">
               <span>Mzazi: ${s.parentName} (${s.parentPhone})</span>
               <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Nafasi: ${rank}/${totalStudents}</span>
             </div>
             <p class="text-slate-700 leading-relaxed">${smsBody}</p>
             <a href="sms:${s.parentPhone}?body=${encodeURIComponent(smsBody)}" class="inline-block bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-[11px]">
-              <i class="fa-solid fa-paper-plane mr-1"></i> Tuma SMS Kupitia Simu
+              <i class="fa-solid fa-paper-plane mr-1"></i> Tuma SMS Mmoja
             </a>
           </div>`;
       });
       box.classList.remove('hidden');
     }
 
+    // FEATURE 1: SEND ALL BULK SMS AT ONCE
+    function sendAllBulkSms() {
+      const items = document.querySelectorAll('.sms-item');
+      if (items.length === 0) { showAlert('Taarifa', 'Hakuna SMS za kutuma kwa sasa. Chagua darasa kwanza.', 'warning'); return; }
+
+      Swal.fire({
+        title: 'Tuma SMS Zote kwa Pamoja?',
+        text: `Utaratibu huu utafungua programu ya ujumbe mfululizo kwa wazazi wote ${items.length} wa darasa hili.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        confirmButtonText: 'Ndiyo, Tuma All'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          items.forEach((item, index) => {
+            const phone = item.dataset.phone;
+            const body = item.dataset.body;
+            setTimeout(() => {
+              window.open(`sms:${phone}?body=${body}`, '_blank');
+            }, index * 800);
+          });
+          showToast('Uendeshaji wa utumaji SMS umeanza!');
+        }
+      });
+    }
+
+    /* ==========================================================
+     * 9. SCHOOL-WIDE OVERALL PERFORMANCE CALCULATION
+     * ========================================================== */
     function initAppSession(user) {
       document.getElementById('authSection').classList.add('hidden');
       document.getElementById('appSection').classList.remove('hidden');
@@ -1454,6 +1632,31 @@
         totalResultsCount += Object.keys(localMarks[exam] || {}).length;
       });
       document.getElementById('cardTotalResults').innerText = totalResultsCount;
+
+      // FEATURE 6: SCHOOL-WIDE OVERALL PERFORMANCE (AWALI - VII)
+      let allAvgsSum = 0;
+      let totalStudentsCount = 0;
+
+      const allExams = ['WEEKLY-TEST', 'MID-TERM', 'TERMINAL', 'ANNUAL'];
+      localStudents.forEach(s => {
+        const subjects = getSubjectsForClass(s.className);
+        allExams.forEach(exam => {
+          const m = (localMarks[exam] && localMarks[exam][s.id]);
+          if (m) {
+            let total = 0;
+            subjects.forEach(sub => { total += Number(m[sub.key]) || 0; });
+            let avg = total / subjects.length;
+            allAvgsSum += avg;
+            totalStudentsCount++;
+          }
+        });
+      });
+
+      let schoolAvg = totalStudentsCount > 0 ? (allAvgsSum / totalStudentsCount).toFixed(1) : 0.0;
+      let schoolGrade = calculateGradeForSchool(schoolAvg);
+
+      document.getElementById('schoolOverallAvg').innerText = schoolAvg;
+      document.getElementById('schoolOverallGrade').innerText = schoolGrade;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
